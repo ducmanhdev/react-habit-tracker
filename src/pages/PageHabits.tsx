@@ -1,4 +1,5 @@
 import {useState} from "react";
+import {useParams} from 'react-router-dom';
 import {Separator} from "@/components/ui/separator"
 import {Button} from "@/components/ui/button"
 import {Search, Plus, ArrowUpDown, Pencil, Trash} from "lucide-react"
@@ -23,7 +24,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import { Calendar } from "@/components/ui/calendar"
 
 import {Bar, BarChart} from "recharts"
 
@@ -42,7 +42,9 @@ const chartConfig = {
 
 import HabitItem from "@/components/HabitItem"
 
-const Home = () => {
+const PageHabits = () => {
+    const {habitGroupId} = useParams();
+
     const orderOptions = [
         {value: "created-date", label: "Created Date"},
         {value: "reminder-date", label: "Reminder Date"},
@@ -69,7 +71,7 @@ const Home = () => {
         <div className="grid grid-cols-2 h-full">
             <section className="border-r">
                 <nav className="p-4 flex gap-2 justify-between items-center">
-                    <h2>All Habits</h2>
+                    <h2>All Habits - {habitGroupId}</h2>
                     <div className="flex gap-2">
                         <Button variant="outline">
                             <Search className="h-4 w-4"/>
@@ -201,4 +203,4 @@ const Home = () => {
     );
 };
 
-export default Home;
+export default PageHabits;

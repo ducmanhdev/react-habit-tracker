@@ -1,26 +1,45 @@
 import {
     createBrowserRouter,
     RouterProvider,
+    Navigate
 } from "react-router-dom";
 import {ThemeProvider} from "@/providers/theme-provider"
-import Home from "@/pages/Home.tsx";
-import About from "@/pages/About.tsx";
-import RootLayout from "@/layouts/RootLayout.tsx";
+import RootLayout from "@/layouts/LayoutMain.tsx";
+import PageHabits from "@/pages/PageHabits.tsx";
+import PageNotFound from "@/pages/PageNotFound";
+import PageAppSetting from "@/pages/PageAppSettings";
+import PageManageHabits from "@/pages/PageManageHabits";
 
 const router = createBrowserRouter([
     {
         path: "/",
+        element: <Navigate to="/habits" replace/>,
+    },
+    {
+        path: "/habits",
         element: <RootLayout/>,
         children: [
             {
-                path: "/",
-                element: <Home/>
+                index: true,
+                element: <PageHabits/>,
             },
             {
-                path: "/about",
-                element: <About/>
+                path: ":habitGroupId",
+                element: <PageHabits/>,
             },
         ]
+    },
+    {
+        path: "/settings",
+        element: <PageAppSetting/>,
+    },
+    {
+        path: "/manage-habits",
+        element: <PageManageHabits/>,
+    },
+    {
+        path: "*",
+        element: <PageNotFound/>,
     },
 ]);
 

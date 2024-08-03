@@ -4,8 +4,8 @@ import {
     Navigate
 } from "react-router-dom";
 import {ThemeProvider} from "@/providers/theme-provider"
-import RootLayout from "@/layouts/LayoutMain.tsx";
-import PageHabits from "@/pages/PageHabits.tsx";
+import RootLayout from "@/layouts/LayoutMain";
+import PageHabits from "@/pages/PageHabits/PageHabits";
 import PageNotFound from "@/pages/PageNotFound";
 import PageAppSetting from "@/pages/PageAppSettings";
 import PageManageHabits from "@/pages/PageManageHabits";

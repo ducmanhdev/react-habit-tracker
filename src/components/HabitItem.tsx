@@ -14,12 +14,17 @@ import {
 } from "@/components/ui/popover"
 
 interface HabitItemProps {
-    isDone?: boolean
+    isComplete?: boolean,
+    isActive?: boolean,
+    onClick: () => void
 }
 
-const HabitItem = ({isDone = false}: HabitItemProps) => {
+const HabitItem = ({isComplete = false, isActive = false, onClick}: HabitItemProps) => {
     return (
-        <div className="p-2 border rounded flex gap-4 items-center">
+        <div
+            className={`p-2 border rounded flex gap-4 items-center cursor-pointer ${isActive && "border-primary"}`}
+            onClick={onClick}
+        >
             <div>
                 <Popover>
                     <PopoverTrigger asChild>
@@ -39,8 +44,8 @@ const HabitItem = ({isDone = false}: HabitItemProps) => {
                 </Popover>
             </div>
             <div className="flex-grow">
-                <p className={`mb-1 ${isDone ? 'line-through' : ''}`}>Stand up</p>
-                <p className={`text-muted-foreground ${isDone ? 'line-through' : ''}`}>0 / 4 times</p>
+                <p className={`mb-1 ${isComplete ? 'line-through' : ''}`}>Stand up</p>
+                <p className={`text-muted-foreground ${isComplete ? 'line-through' : ''}`}>0 / 4 times</p>
             </div>
             <div className="flex gap-2">
                 <Button size="sm" variant="secondary">

@@ -4,11 +4,11 @@ import {Pencil, Trash} from "lucide-react";
 import DatePicker from "@/components/DatePicker.tsx";
 import {Habit} from "@/types/habits.ts";
 
-interface IRightBar {
+type RightBarProps = {
     currentHabit: Habit
 }
 
-const RightBar = ({currentHabit}: IRightBar) => {
+const RightBar = ({currentHabit}: RightBarProps) => {
     const [date, setDate] = useState<Date>();
 
     return (

@@ -17,7 +17,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 
-interface DatePickerProps {
+type DatePickerProps = {
     value?: Date;
     onChange: (date: Date | undefined) => void;
 }

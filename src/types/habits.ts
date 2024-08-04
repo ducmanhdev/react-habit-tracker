@@ -1,4 +1,4 @@
-export interface IHabitItem {
+export type Habit = {
     id: number,
     groupId: number,
     title: string,

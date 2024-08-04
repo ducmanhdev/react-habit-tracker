@@ -8,9 +8,13 @@ import {
 import {Button} from "@/components/ui/button.tsx";
 import {Separator} from "@/components/ui/separator.tsx"
 import Icon, {IconProps} from "@/components/Icon.tsx"
+import {useAuthActions} from "@convex-dev/auth/react";
+import {useQuery} from "convex/react";
+import {api} from "../../../convex/_generated/api";
 
 export default function Aside() {
-
+    const {signOut} = useAuthActions();
+    const currentUser = useQuery(api.users.currentUser);
     const main = [
         {id: 1, label: "All habits", icon: "square-library", route: "/habits"},
     ]
@@ -75,13 +79,13 @@ export default function Aside() {
             <div className="p-4">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="w-full">work.ducmanh0323@gmail.com</Button>
+                        <Button variant="outline" className="w-full">{currentUser?.name}</Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         <DropdownMenuItem asChild>
                             <Link to="/profile">Profile</Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem>Logout</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => void signOut()}>Logout</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>

@@ -1,16 +1,16 @@
 import {Separator} from "@/components/ui/separator.tsx"
-import LeftBar, {IFilteredData} from "@/pages/PageHabits/LeftBar.tsx";
+import LeftBar, {FilteredData} from "@/pages/PageHabits/LeftBar.tsx";
 import {useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import RightBar from "@/pages/PageHabits/RightBar.tsx";
 import HabitBoard from "@/pages/PageHabits/HabitBoard.tsx";
 import HabitList from "@/pages/PageHabits/HabitList.tsx";
-import {IHabitItem} from "@/types/habits"
+import {Habit} from "@/types/habits"
 
 const Index = () => {
     const {habitGroupId} = useParams();
-    const [filteredHabits, setFilteredHabits] = useState<IFilteredData>();
-    const [habits, setHabits] = useState<IHabitItem[]>([]);
+    const [filteredHabits, setFilteredHabits] = useState<FilteredData>();
+    const [habits, setHabits] = useState<Habit[]>([]);
     const handleGetListHabits = () => {
         const list = [
             {
@@ -60,7 +60,7 @@ const Index = () => {
         filteredHabits?.date,
     ]);
 
-    const [currentHabit, setCurrentHabit] = useState<IHabitItem>();
+    const [currentHabit, setCurrentHabit] = useState<Habit>();
 
     return (
         <div className="grid grid-cols-2 h-full">

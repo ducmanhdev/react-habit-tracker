@@ -13,7 +13,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 
-interface HabitItemProps {
+type HabitItemProps = {
     isComplete?: boolean,
     isActive?: boolean,
     onClick: () => void

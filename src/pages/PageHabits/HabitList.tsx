@@ -1,21 +1,21 @@
 import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion.tsx";
 import HabitItem from "@/components/HabitItem.tsx";
 import dayjs from "dayjs";
-import {IHabitItem} from "@/types/habits"
+import {Habit} from "@/types/habits"
 import {DATE_FORMAT} from "@/constants";
 
-interface IHabitListProps {
-    items: IHabitItem[];
+type HabitListProps = {
+    items: Habit[];
     currentHabitId: number | undefined;
-    onSelectHabit: (habit: IHabitItem) => void
+    onSelectHabit: (habit: Habit) => void
 }
 
-interface HabitGroup {
+type HabitGroup = {
     label: string;
-    items: IHabitItem[];
+    items: Habit[];
 }
 
-const HabitList = ({items, currentHabitId, onSelectHabit}: IHabitListProps) => {
+const HabitList = ({items, currentHabitId, onSelectHabit}: HabitListProps) => {
     const defaultValue = ["this-date", "this-week"]
 
     const handleGroupItems = () => {
@@ -69,7 +69,7 @@ const HabitList = ({items, currentHabitId, onSelectHabit}: IHabitListProps) => {
                                 <AccordionTrigger>{group.label}</AccordionTrigger>
                                 <AccordionContent className="space-y-2">
                                     {
-                                        group.items.map((item: IHabitItem) => {
+                                        group.items.map((item: Habit) => {
                                             return (
                                                 <HabitItem
                                                     key={item.id}

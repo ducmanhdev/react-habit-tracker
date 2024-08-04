@@ -1,7 +1,7 @@
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {ChartConfig, ChartContainer} from "@/components/ui/chart.tsx";
 import {Bar, BarChart} from "recharts";
-import {IHabitItem} from "@/types/habits.ts";
+import {Habit} from "@/types/habits.ts";
 
 const chartConfig = {
     desktop: {
@@ -14,8 +14,8 @@ const chartConfig = {
     },
 } satisfies ChartConfig
 
-interface HabitBoardProps {
-    currentHabit: IHabitItem
+type HabitBoardProps = {
+    currentHabit: Habit
 }
 
 const HabitBoard = ({currentHabit}: HabitBoardProps) => {

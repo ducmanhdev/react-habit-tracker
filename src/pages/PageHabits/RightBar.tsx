@@ -2,10 +2,10 @@ import {useState} from "react";
 import {Button} from "@/components/ui/button.tsx";
 import {Pencil, Trash} from "lucide-react";
 import DatePicker from "@/components/DatePicker.tsx";
-import {IHabitItem} from "@/types/habits.ts";
+import {Habit} from "@/types/habits.ts";
 
 interface IRightBar {
-    currentHabit: IHabitItem
+    currentHabit: Habit
 }
 
 const RightBar = ({currentHabit}: IRightBar) => {

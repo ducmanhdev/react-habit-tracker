@@ -6,18 +6,18 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/c
 import {Input} from "@/components/ui/input.tsx";
 import {useDebounce} from "@uidotdev/usehooks";
 
-export interface IFilteredData {
+export type FilteredData = {
     search: string | undefined;
     order: string;
     date: Date | undefined;
 }
 
-interface IPageHabitsLeftBarProps {
+type PageHabitsLeftBarProps = {
     habitGroupId: string | undefined;
-    onFilter: (filteredData: IFilteredData) => void;
+    onFilter: (filteredData: FilteredData) => void;
 }
 
-const LeftBar = ({habitGroupId, onFilter}: IPageHabitsLeftBarProps) => {
+const LeftBar = ({habitGroupId, onFilter}: PageHabitsLeftBarProps) => {
     const orderOptions = [
         {value: "created-date", label: "Created Date"},
         {value: "reminder-date", label: "Reminder Date"},

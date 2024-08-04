@@ -4,12 +4,12 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu.tsx"
 import {Button} from "@/components/ui/button.tsx";
-import {Separator} from "@/components/ui/separator"
-import Icon, {IconProps} from "@/components/Icon"
+import {Separator} from "@/components/ui/separator.tsx"
+import Icon, {IconProps} from "@/components/Icon.tsx"
 
-export default function LayoutMainAside() {
+export default function Aside() {
 
     const main = [
         {id: 1, label: "All habits", icon: "square-library", route: "/habits"},
@@ -55,7 +55,7 @@ export default function LayoutMainAside() {
                                         end
                                         to={child.route}
                                         className={({isActive}) =>
-                                            `flex items-center gap-3 rounded-xl px-3 py-2 hover:text-foreground ${isActive ? "text-white" : ""}`
+                                            `flex items-center gap-3 px-3 py-2 hover:text-foreground ${isActive ? "text-white" : ""}`
                                         }
                                     >
                                         <Icon

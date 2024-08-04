@@ -7,7 +7,7 @@ import HabitBoard from "@/pages/PageHabits/HabitBoard.tsx";
 import HabitList from "@/pages/PageHabits/HabitList.tsx";
 import {IHabitItem} from "@/types/habits"
 
-const PageHabits = () => {
+const Index = () => {
     const {habitGroupId} = useParams();
     const [filteredHabits, setFilteredHabits] = useState<IFilteredData>();
     const [habits, setHabits] = useState<IHabitItem[]>([]);
@@ -93,4 +93,4 @@ const PageHabits = () => {
     );
 };
 
-export default PageHabits;
+export default Index;

@@ -1,10 +1,10 @@
 import {Outlet} from "react-router-dom";
-import LayoutMainAside from "@/layouts/LayoutMainAside.tsx";
+import Aside from "@/layouts/LayoutMain/Aside.tsx";
 
-export default function LayoutMain() {
+export default function Index() {
     return (
         <main className="grid grid-cols-[300px_1fr] h-screen">
-            <LayoutMainAside/>
+            <Aside/>
             <section>
                 <Outlet/>
             </section>

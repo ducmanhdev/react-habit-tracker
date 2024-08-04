@@ -4,8 +4,8 @@ import {
     Navigate
 } from "react-router-dom";
 import {ThemeProvider} from "@/providers/theme-provider"
-import RootLayout from "@/layouts/LayoutMain";
-import PageHabits from "@/pages/PageHabits/PageHabits";
+import RootLayout from "@/layouts/LayoutMain/Index";
+import Index from "@/pages/PageHabits/Index";
 import PageNotFound from "@/pages/PageNotFound";
 import PageAppSetting from "@/pages/PageAppSettings";
 import PageManageHabits from "@/pages/PageManageHabits";
@@ -21,11 +21,11 @@ const router = createBrowserRouter([
         children: [
             {
                 index: true,
-                element: <PageHabits/>,
+                element: <Index/>,
             },
             {
                 path: ":habitGroupId",
-                element: <PageHabits/>,
+                element: <Index/>,
             },
         ]
     },

@@ -9,6 +9,8 @@ import Index from "@/pages/PageHabits/Index";
 import PageNotFound from "@/pages/PageNotFound";
 import PageAppSetting from "@/pages/PageAppSettings";
 import PageManageHabits from "@/pages/PageManageHabits";
+import PageLogin from "@/pages/PageLogin.tsx";
+import PageRegister from "@/pages/PageRegister.tsx";
 
 const router = createBrowserRouter([
     {
@@ -36,6 +38,14 @@ const router = createBrowserRouter([
     {
         path: "/manage-habits",
         element: <PageManageHabits/>,
+    },
+    {
+        path: "/login",
+        element: <PageLogin/>,
+    },
+    {
+        path: "/register",
+        element: <PageRegister/>,
     },
     {
         path: "*",

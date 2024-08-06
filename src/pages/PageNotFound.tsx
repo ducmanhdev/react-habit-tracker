@@ -9,7 +9,7 @@ const PageNotFound = () => (
         <p className="text-lg mb-4">Sorry, the page you requested does not exist.</p>
         <Button asChild>
             <Link to="/">
-                <MoveLeft className="w-4 h-4 mr-2" />
+                <MoveLeft />
                 Return home
             </Link>
         </Button>

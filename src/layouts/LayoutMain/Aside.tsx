@@ -11,6 +11,7 @@ import Icon, {IconProps} from "@/components/Icon.tsx"
 import {useAuthActions} from "@convex-dev/auth/react";
 import {useQuery} from "convex/react";
 import {api} from "../../../convex/_generated/api";
+import {Plus} from "lucide-react";
 
 export default function Aside() {
     const {signOut} = useAuthActions();
@@ -51,25 +52,45 @@ export default function Aside() {
                 {
                     navGroups.map(group => (
                         <nav key={group.name}>
-                            {group.name && <p className="px-3 py-2 text-xs font-semibold">{group.name}</p>}
+                            {
+                                group.name &&
+                                (
+                                    <p className="px-4 py-2 text-sm font-semibold">{group.name}</p>
+                                )
+                            }
                             {
                                 group.children.map(child => (
-                                    <NavLink
+                                    <Button
                                         key={child.id}
-                                        end
-                                        to={child.route}
-                                        className={({isActive}) =>
-                                            `flex items-center gap-3 px-3 py-2 hover:text-foreground ${isActive ? "text-white" : ""}`
-                                        }
+                                        asChild
+                                        variant="ghost"
+                                        className="w-full justify-start"
                                     >
-                                        <Icon
-                                            key={child.id}
-                                            name={child.icon as IconProps['name']}
-                                            className="h-5 w-5"
-                                        />
-                                        {child.label}
-                                    </NavLink>
+                                        <NavLink
+                                            end
+                                            to={child.route}
+                                            className={({isActive}) => `${isActive ? "text-white" : ""}`}
+                                        >
+                                            <Icon
+                                                key={child.id}
+                                                name={child.icon as IconProps['name']}
+                                            />
+                                            {child.label}
+                                        </NavLink>
+                                    </Button>
                                 ))
+                            }
+                            {
+                                group.name === "GROUPS" &&
+                                (
+                                    <Button
+                                        variant="ghost"
+                                        className="w-full justify-start"
+                                    >
+                                        <Plus />
+                                        Add new item
+                                    </Button>
+                                )
                             }
                         </nav>
                     ))

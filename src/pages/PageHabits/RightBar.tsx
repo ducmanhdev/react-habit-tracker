@@ -16,10 +16,10 @@ const RightBar = ({currentHabit}: RightBarProps) => {
             <h2>{currentHabit.title}</h2>
             <div className="flex gap-2">
                 <Button variant="outline">
-                    <Pencil className="h-4 w-4"/>
+                    <Pencil />
                 </Button>
                 <Button variant="outline">
-                    <Trash className="h-4 w-4"/>
+                    <Trash />
                 </Button>
                 <DatePicker value={date} onChange={setDate}/>
             </div>

@@ -63,7 +63,7 @@ const LeftBar = ({habitGroupId, onFilter}: PageHabitsLeftBarProps) => {
                             variant="outline"
                             onClick={() => setIsSearchBarVisible(true)}
                         >
-                            <Search className="h-4 w-4"/>
+                            <Search/>
                         </Button>
                 }
                 {
@@ -72,7 +72,7 @@ const LeftBar = ({habitGroupId, onFilter}: PageHabitsLeftBarProps) => {
                             variant="outline"
                             onClick={() => setIsSearchBarVisible(false)}
                         >
-                            <Calendar className="h-4 w-4"/>
+                            <Calendar />
                         </Button> :
                         <DatePicker value={date} onChange={setDate}/>
                 }
@@ -90,7 +90,7 @@ const LeftBar = ({habitGroupId, onFilter}: PageHabitsLeftBarProps) => {
                     </SelectContent>
                 </Select>
                 <Button variant="default">
-                    <Plus className="h-4 w-4 mr-2"/>
+                    <Plus/>
                     Add new habit
                 </Button>
             </div>

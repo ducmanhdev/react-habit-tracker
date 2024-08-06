@@ -29,14 +29,14 @@ const HabitItem = ({isComplete = false, isActive = false, onClick}: HabitItemPro
                 <Popover>
                     <PopoverTrigger asChild>
                         <Button variant="outline" size="icon">
-                            <ArrowUpDown className="h-4 w-4"/>
+                            <ArrowUpDown />
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-fit">
                         <div className="grid grid-cols-4 gap-2">
                             {Array.from(Array(10)).map((_, index) => (
                                 <Button key={index} size="icon" variant="outline">
-                                    <ArrowUpDown className="h-4 w-4"/>
+                                    <ArrowUpDown />
                                 </Button>
                             ))}
                         </div>
@@ -49,43 +49,43 @@ const HabitItem = ({isComplete = false, isActive = false, onClick}: HabitItemPro
             </div>
             <div className="flex gap-2">
                 <Button size="sm" variant="secondary">
-                    <Plus className="h-4 w-4 mr-2"/>
+                    <Plus />
                     1
                 </Button>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="secondary" size="sm" className="w-full">
-                            <EllipsisVertical className="w-4 h-4"/>
+                            <EllipsisVertical />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         <DropdownMenuItem>
                             <Button variant="ghost" size="sm" className="w-full justify-start">
-                                <Check className="w-4 h-4 mr-2"/>
+                                <Check />
                                 Check-in
                             </Button>
                         </DropdownMenuItem>
                         <DropdownMenuItem>
                             <Button variant="ghost" size="sm" className="w-full justify-start">
-                                <SkipForward className="w-4 h-4 mr-2"/>
+                                <SkipForward />
                                 Skip
                             </Button>
                         </DropdownMenuItem>
                         <DropdownMenuItem>
                             <Button variant="ghost" size="sm" className="w-full justify-start">
-                                <X className="w-4 h-4 mr-2"/>
+                                <X />
                                 Fail
                             </Button>
                         </DropdownMenuItem>
                         <DropdownMenuItem>
                             <Button variant="ghost" size="sm" className="w-full justify-start">
-                                <Pencil className="w-4 h-4 mr-2"/>
+                                <Pencil />
                                 Edit
                             </Button>
                         </DropdownMenuItem>
                         <DropdownMenuItem>
                             <Button variant="ghost" size="sm" className="w-full justify-start">
-                                <ChartNoAxesColumn className="w-4 h-4 mr-2"/>
+                                <ChartNoAxesColumn />
                                 View Progress
                             </Button>
                         </DropdownMenuItem>

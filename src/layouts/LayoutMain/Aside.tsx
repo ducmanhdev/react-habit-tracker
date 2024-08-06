@@ -12,6 +12,7 @@ import {useAuthActions} from "@convex-dev/auth/react";
 import {useQuery} from "convex/react";
 import {api} from "../../../convex/_generated/api";
 import {Plus} from "lucide-react";
+import {Avatar, AvatarImage, AvatarFallback} from "@/components/ui/avatar.tsx";
 
 export default function Aside() {
     const {signOut} = useAuthActions();
@@ -45,7 +46,7 @@ export default function Aside() {
         }
     ]
 
-
+    currentUser?.name
     return (
         <aside className="border-r flex flex-col">
             <div className="p-4 flex-grow text-muted-foreground space-y-4">
@@ -87,7 +88,7 @@ export default function Aside() {
                                         variant="ghost"
                                         className="w-full justify-start"
                                     >
-                                        <Plus />
+                                        <Plus/>
                                         Add new item
                                     </Button>
                                 )
@@ -100,7 +101,22 @@ export default function Aside() {
             <div className="p-4">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="w-full">{currentUser?.name}</Button>
+                        <Button variant="outline" className="w-full">
+                            <Avatar className="w-6 h-6">
+                                <AvatarImage src={currentUser?.image} alt="User avatar"/>
+                                <AvatarFallback>
+                                    {
+                                        currentUser?.name
+                                            ?.split(" ")
+                                            .map(item => item[0])
+                                            .slice(0, 2)
+                                            .join("")
+                                            .toUpperCase()
+                                    }
+                                </AvatarFallback>
+                            </Avatar>
+                            {currentUser?.name}
+                        </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         <DropdownMenuItem asChild>

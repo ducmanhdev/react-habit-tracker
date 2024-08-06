@@ -2,9 +2,9 @@ import {PropsWithChildren} from "react";
 import {Authenticated, AuthLoading, Unauthenticated} from "convex/react";
 import {Navigate} from "react-router-dom";
 
-type ProtectedRouteProps = PropsWithChildren
+type PublicRouteProps = PropsWithChildren
 
-const ProtectedRoute = ({children}: ProtectedRouteProps) => {
+const PublicRoute = ({children}: PublicRouteProps) => {
     return (
         <>
             <AuthLoading>
@@ -13,13 +13,13 @@ const ProtectedRoute = ({children}: ProtectedRouteProps) => {
                 </div>
             </AuthLoading>
             <Authenticated>
-                {children}
+                <Navigate to="/" replace/>
             </Authenticated>
             <Unauthenticated>
-                <Navigate to="/login" replace/>,
+                {children}
             </Unauthenticated>
         </>
-    )
+    );
 };
 
-export default ProtectedRoute;
+export default PublicRoute;

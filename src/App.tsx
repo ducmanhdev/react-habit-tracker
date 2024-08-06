@@ -10,11 +10,18 @@ import PageNotFound from "@/pages/PageNotFound";
 import PageAppSetting from "@/pages/PageAppSettings";
 import PageManageHabits from "@/pages/PageManageHabits";
 import PageLogin from "@/pages/PageLogin";
+import ProtectedRoute from "@/components/ProtectedRoute.tsx";
+import PublicRoute from "@/components/PublicRoute.tsx";
+import { Toaster } from "@/components/ui/toaster"
 
 const router = createBrowserRouter([
     {
         path: "/",
-        element: <RootLayout/>,
+        element: (
+            <ProtectedRoute>
+                <RootLayout/>
+            </ProtectedRoute>
+        ),
         children: [
             {
                 index: true,
@@ -36,7 +43,11 @@ const router = createBrowserRouter([
     },
     {
         path: "/login",
-        element: <PageLogin/>,
+        element: (
+            <PublicRoute>
+                <PageLogin/>
+            </PublicRoute>
+        ),
     },
     {
         path: "*",
@@ -48,6 +59,7 @@ export default function App() {
     return (
         <ThemeProvider>
             <RouterProvider router={router}/>
+            <Toaster />
         </ThemeProvider>
     )
 }

@@ -1,4 +1,5 @@
-import {NavLink, Link} from "react-router-dom";
+import {ReactNode} from "react";
+import {NavLink, Link, NavLinkProps} from "react-router-dom";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -9,22 +10,62 @@ import {Button} from "@/components/ui/button.tsx";
 import {Separator} from "@/components/ui/separator.tsx"
 import Icon, {IconProps} from "@/components/Icon.tsx"
 import {useAuthActions} from "@convex-dev/auth/react";
-import {useQuery} from "convex/react";
+import {useMutation, useQuery} from "convex/react";
 import {api} from "../../../convex/_generated/api";
-import {Plus} from "lucide-react";
+import {Pencil} from "lucide-react";
 import {Avatar, AvatarImage, AvatarFallback} from "@/components/ui/avatar.tsx";
 
-export default function Aside() {
+type AsideMenuItemProps = {
+    id?: number | string;
+    route?: NavLinkProps['to'];
+    onClick?: () => void;
+    icon: string;
+    label: string;
+    suffixIcon?: ReactNode;
+}
+
+const AsideMenuItem = ({id, icon, label, route, onClick, suffixIcon}: AsideMenuItemProps) => {
+    const ButtonInner = route ? NavLink : "span";
+    return (
+        <Button
+            key={id}
+            asChild
+            variant="ghost"
+            className="w-full justify-start inline-grid grid-cols-[auto_1fr_auto] cursor-pointer"
+            onClick={onClick}
+        >
+            {/*TODO Fix Types of property to are incompatible. */}
+            <ButtonInner
+                {...(route && {
+                    to: route,
+                    end: true,
+                    className: ({isActive}) => `${isActive ? "text-white" : ""}`
+                })}
+            >
+                <Icon key={id} name={icon as IconProps['name']}/>
+                {label}
+                {suffixIcon}
+            </ButtonInner>
+        </Button>
+    )
+}
+
+const Aside = () => {
     const {signOut} = useAuthActions();
     const currentUser = useQuery(api.users.currentUser);
+    const habitGroups = useQuery(api.habits.getHabitGroups);
+    const addHabitGroup = useMutation(api.habits.addHabitGroup);
+
     const main = [
         {id: 1, label: "All habits", icon: "square-library", route: "/habits"},
     ]
 
-    const groups = [
-        {id: 1, label: "Study", icon: "book-copy", route: "/habits/1"},
-        {id: 2, label: "Plans", icon: "sprout", route: "/habits/2"},
-    ]
+    const groups = (habitGroups || []).map(group => ({
+        id: group._id,
+        label: group.name,
+        icon: group.icon,
+        route: `/habits/${group._id}`
+    }))
 
     const settings = [
         {id: 1, label: "Manage habits", icon: "list", route: "/manage-habits"},
@@ -46,7 +87,9 @@ export default function Aside() {
         }
     ]
 
-    currentUser?.name
+    const handleOpenCreateGroupDialog = () => {
+    }
+
     return (
         <aside className="border-r flex flex-col">
             <div className="p-4 flex-grow text-muted-foreground space-y-4">
@@ -54,43 +97,30 @@ export default function Aside() {
                     navGroups.map(group => (
                         <nav key={group.name}>
                             {
-                                group.name &&
-                                (
-                                    <p className="px-4 py-2 text-sm font-semibold">{group.name}</p>
-                                )
+                                group.name && <p className="px-4 py-2 text-sm font-semibold">{group.name}</p>
                             }
                             {
                                 group.children.map(child => (
-                                    <Button
+                                    <AsideMenuItem
                                         key={child.id}
-                                        asChild
-                                        variant="ghost"
-                                        className="w-full justify-start"
-                                    >
-                                        <NavLink
-                                            end
-                                            to={child.route}
-                                            className={({isActive}) => `${isActive ? "text-white" : ""}`}
-                                        >
-                                            <Icon
-                                                key={child.id}
-                                                name={child.icon as IconProps['name']}
-                                            />
-                                            {child.label}
-                                        </NavLink>
-                                    </Button>
+                                        id={child.id}
+                                        route={child.route}
+                                        icon={child.icon}
+                                        label={child.label}
+                                        suffixIcon={
+                                            group.name === "GROUPS" && <Pencil onClick={e => e.preventDefault()}/>
+                                        }
+                                    />
                                 ))
                             }
                             {
                                 group.name === "GROUPS" &&
                                 (
-                                    <Button
-                                        variant="ghost"
-                                        className="w-full justify-start"
-                                    >
-                                        <Plus/>
-                                        Add new item
-                                    </Button>
+                                    <AsideMenuItem
+                                        icon="plus"
+                                        label="Add new item"
+                                        onClick={handleOpenCreateGroupDialog}
+                                    />
                                 )
                             }
                         </nav>
@@ -128,4 +158,6 @@ export default function Aside() {
             </div>
         </aside>
     )
-}
+};
+
+export default Aside

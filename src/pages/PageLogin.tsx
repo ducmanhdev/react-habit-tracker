@@ -20,7 +20,7 @@ import {
 import {zodResolver} from "@hookform/resolvers/zod"
 import {useForm} from "react-hook-form"
 import {z} from "zod"
-import {useToast} from "@/components/ui/use-toast"
+import {toast} from "sonner"
 
 const formSchema = z.object({
     email: z.string().email("Please enter a valid email"),
@@ -29,7 +29,6 @@ const formSchema = z.object({
 export const PageLogin = () => {
     const {signIn} = useAuthActions();
     const [submitting, setSubmitting] = useState(false);
-    const {toast} = useToast()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -43,14 +42,9 @@ export const PageLogin = () => {
         formData.append("email", values.email)
         try {
             await signIn("resend", formData);
-            toast({
-                title: "Email was sent successfully",
-            })
+            toast.success("Email was sent successfully")
         } catch (error) {
-            toast({
-                variant: "destructive",
-                title: "Could not send login link",
-            });
+            toast.error("Could not send login link")
             // TODO Make error better
             // TODO Make email template better
         } finally {

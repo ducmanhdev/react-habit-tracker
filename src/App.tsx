@@ -12,8 +12,7 @@ import PageManageHabits from "@/pages/PageManageHabits";
 import PageLogin from "@/pages/PageLogin";
 import ProtectedRoute from "@/components/ProtectedRoute.tsx";
 import PublicRoute from "@/components/PublicRoute.tsx";
-import {Toaster} from "@/components/ui/toaster"
-import {Toaster as SonnerToast} from "@/components/ui/sonner"
+import {Toaster} from "@/components/ui/sonner";
 
 const router = createBrowserRouter([
     {
@@ -60,8 +59,7 @@ export default function App() {
     return (
         <ThemeProvider>
             <RouterProvider router={router}/>
-            <Toaster/>
-            <SonnerToast richColors/>
+            <Toaster richColors/>
         </ThemeProvider>
     )
 }

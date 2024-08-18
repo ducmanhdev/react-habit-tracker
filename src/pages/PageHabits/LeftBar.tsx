@@ -1,10 +1,9 @@
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useRef, useState, useDeferredValue} from "react";
 import {Button} from "@/components/ui/button.tsx";
 import {ArrowUpDown, Calendar, Plus, Search} from "lucide-react";
 import DatePicker from "@/components/DatePicker.tsx";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select.tsx";
 import {Input} from "@/components/ui/input.tsx";
-import {useDebounce} from "@uidotdev/usehooks";
 
 export type FilteredData = {
     search: string | undefined;
@@ -38,12 +37,16 @@ const LeftBar = ({habitGroupId, onFilter}: PageHabitsLeftBarProps) => {
     }, [isSearchBarVisible]);
 
     const [search, setSearch] = useState("");
-    const debouncedSearch = useDebounce(search, 300);
+    const deferredSearch = useDeferredValue(search);
     const [order, setOrder] = useState(orderOptions[0].value);
     const [date, setDate] = useState<Date>();
     useEffect(() => {
-        onFilter({search, order, date});
-    }, [debouncedSearch, order, date]);
+        onFilter({
+            search: deferredSearch,
+            order,
+            date
+        });
+    }, [deferredSearch, order, date, onFilter]);
 
     return (
         <nav className="p-4 flex gap-2 justify-between items-center">
@@ -72,7 +75,7 @@ const LeftBar = ({habitGroupId, onFilter}: PageHabitsLeftBarProps) => {
                             variant="outline"
                             onClick={() => setIsSearchBarVisible(false)}
                         >
-                            <Calendar />
+                            <Calendar/>
                         </Button> :
                         <DatePicker value={date} onChange={setDate}/>
                 }

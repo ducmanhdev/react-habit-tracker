@@ -1,4 +1,4 @@
-import {ReactNode} from "react";
+import {ReactNode, useRef} from "react";
 import {NavLink, Link, NavLinkProps} from "react-router-dom";
 import {
     DropdownMenu,
@@ -10,10 +10,11 @@ import {Button} from "@/components/ui/button.tsx";
 import {Separator} from "@/components/ui/separator.tsx"
 import Icon, {IconProps} from "@/components/Icon.tsx"
 import {useAuthActions} from "@convex-dev/auth/react";
-import {useMutation, useQuery} from "convex/react";
+import {useQuery} from "convex/react";
 import {api} from "../../../convex/_generated/api";
 import {Pencil} from "lucide-react";
 import {Avatar, AvatarImage, AvatarFallback} from "@/components/ui/avatar.tsx";
+import ModalAddHabitGroup, {ModalAddHabitGroupRef} from "@/components/ModalAddHabitGroup.tsx";
 
 type AsideMenuItemProps = {
     id?: number | string;
@@ -54,20 +55,34 @@ const Aside = () => {
     const {signOut} = useAuthActions();
     const currentUser = useQuery(api.users.currentUser);
     const habitGroups = useQuery(api.habits.getHabitGroups);
-    const addHabitGroup = useMutation(api.habits.addHabitGroup);
 
-    const main = [
+    const main: AsideMenuItemProps[] = [
         {id: 1, label: "All habits", icon: "square-library", route: "/habits"},
     ]
 
-    const groups = (habitGroups || []).map(group => ({
-        id: group._id,
-        label: group.name,
-        icon: group.icon,
-        route: `/habits/${group._id}`
-    }))
+    const modalAddHabitGroupRef = useRef<ModalAddHabitGroupRef>(null);
+    const groups: AsideMenuItemProps[] = [
+        ...(habitGroups || []).map(group => ({
+            id: group._id,
+            label: group.name,
+            icon: group.icon,
+            route: `/habits/${group._id}`,
+            suffixIcon: <Pencil
+                onClick={() => modalAddHabitGroupRef?.current?.open({
+                    id: group._id,
+                    icon: group.icon,
+                    name: group.name
+                })}/>,
+        })),
+        {
+            id: '',
+            label: 'Add new group',
+            icon: 'plus',
+            onClick: () => modalAddHabitGroupRef?.current?.open(),
+        }
+    ]
 
-    const settings = [
+    const settings: AsideMenuItemProps[] = [
         {id: 1, label: "Manage habits", icon: "list", route: "/manage-habits"},
         {id: 2, label: "App settings", icon: "settings", route: "/settings"},
     ]
@@ -87,76 +102,65 @@ const Aside = () => {
         }
     ]
 
-    const handleOpenCreateGroupDialog = () => {
-    }
-
     return (
-        <aside className="border-r flex flex-col">
-            <div className="p-4 flex-grow text-muted-foreground space-y-4">
-                {
-                    navGroups.map(group => (
-                        <nav key={group.name}>
-                            {
-                                group.name && <p className="px-4 py-2 text-sm font-semibold">{group.name}</p>
-                            }
-                            {
-                                group.children.map(child => (
-                                    <AsideMenuItem
-                                        key={child.id}
-                                        id={child.id}
-                                        route={child.route}
-                                        icon={child.icon}
-                                        label={child.label}
-                                        suffixIcon={
-                                            group.name === "GROUPS" && <Pencil onClick={e => e.preventDefault()}/>
+        <>
+            <ModalAddHabitGroup ref={modalAddHabitGroupRef}/>
+            <aside className="border-r flex flex-col">
+                <div className="p-4 flex-grow text-muted-foreground space-y-4">
+                    {
+                        navGroups.map(group => (
+                            <nav key={group.name}>
+                                {
+                                    group.name && <p className="px-4 py-2 text-sm font-semibold">{group.name}</p>
+                                }
+                                {
+                                    group.children.map(child => (
+                                        <AsideMenuItem
+                                            key={child.id}
+                                            id={child.id}
+                                            route={child.route}
+                                            icon={child.icon}
+                                            label={child.label}
+                                            suffixIcon={child.suffixIcon}
+                                            onClick={child.onClick}
+                                        />
+                                    ))
+                                }
+                            </nav>
+                        ))
+                    }
+                </div>
+                <Separator/>
+                <div className="p-4">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="w-full">
+                                <Avatar className="w-6 h-6">
+                                    <AvatarImage src={currentUser?.image} alt="User avatar"/>
+                                    <AvatarFallback>
+                                        {
+                                            currentUser?.name
+                                                ?.split(" ")
+                                                .map(item => item[0])
+                                                .slice(0, 2)
+                                                .join("")
+                                                .toUpperCase()
                                         }
-                                    />
-                                ))
-                            }
-                            {
-                                group.name === "GROUPS" &&
-                                (
-                                    <AsideMenuItem
-                                        icon="plus"
-                                        label="Add new item"
-                                        onClick={handleOpenCreateGroupDialog}
-                                    />
-                                )
-                            }
-                        </nav>
-                    ))
-                }
-            </div>
-            <Separator/>
-            <div className="p-4">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="w-full">
-                            <Avatar className="w-6 h-6">
-                                <AvatarImage src={currentUser?.image} alt="User avatar"/>
-                                <AvatarFallback>
-                                    {
-                                        currentUser?.name
-                                            ?.split(" ")
-                                            .map(item => item[0])
-                                            .slice(0, 2)
-                                            .join("")
-                                            .toUpperCase()
-                                    }
-                                </AvatarFallback>
-                            </Avatar>
-                            {currentUser?.name}
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                        <DropdownMenuItem asChild>
-                            <Link to="/profile">Profile</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => void signOut()}>Logout</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
-        </aside>
+                                    </AvatarFallback>
+                                </Avatar>
+                                {currentUser?.name}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem asChild>
+                                <Link to="/profile">Profile</Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => void signOut()}>Logout</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            </aside>
+        </>
     )
 };
 

@@ -47,7 +47,7 @@ const LeftBar = ({habitGroupId, onFilter}: PageHabitsLeftBarProps) => {
 
     return (
         <nav className="p-4 flex gap-2 justify-between items-center">
-            <h2>All Habits - {habitGroupId}</h2>
+            <h2>All Habits</h2>
             <div className="flex gap-2">
                 {
                     isSearchBarVisible ?

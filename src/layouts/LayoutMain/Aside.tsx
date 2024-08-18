@@ -26,7 +26,14 @@ type AsideMenuItemProps = {
 }
 
 const AsideMenuItem = ({id, icon, label, route, onClick, suffixIcon}: AsideMenuItemProps) => {
-    const ButtonInner = route ? NavLink : "span";
+    const content = (
+        <>
+            <Icon key={id} name={icon as IconProps['name']}/>
+            {label}
+            {suffixIcon}
+        </>
+    );
+
     return (
         <Button
             key={id}
@@ -35,21 +42,22 @@ const AsideMenuItem = ({id, icon, label, route, onClick, suffixIcon}: AsideMenuI
             className="w-full justify-start inline-grid grid-cols-[auto_1fr_auto] cursor-pointer"
             onClick={onClick}
         >
-            {/*TODO Fix Types of property to are incompatible. */}
-            <ButtonInner
-                {...(route && {
-                    to: route,
-                    end: true,
-                    className: ({isActive}) => `${isActive ? "text-white" : ""}`
-                })}
-            >
-                <Icon key={id} name={icon as IconProps['name']}/>
-                {label}
-                {suffixIcon}
-            </ButtonInner>
+            {route ? (
+                <NavLink
+                    to={route}
+                    end
+                    className={({isActive}) => `${isActive ? "text-white" : ""}`}
+                >
+                    {content}
+                </NavLink>
+            ) : (
+                <span>
+                    {content}
+                </span>
+            )}
         </Button>
-    )
-}
+    );
+};
 
 const Aside = () => {
     const {signOut} = useAuthActions();

@@ -1,4 +1,4 @@
-import {useState, useEffect} from "react";
+import {useState, useEffect, useMemo} from "react";
 import {Button} from "@/components/ui/button";
 import {
     Popover,
@@ -10,21 +10,28 @@ import {Input} from "@/components/ui/input.tsx";
 import {icons, LucideIcon} from "lucide-react";
 import {useInView} from "react-intersection-observer";
 
-type IconName = keyof typeof icons;
+export type IconName = keyof typeof icons;
 
-const IconPicker = () => {
+type IconPickerProps = {
+    currentIcon?: IconName;
+    onIconSelect?: (iconName: IconName) => void;
+}
+
+const iconNames = Object.keys(icons) as IconName[];
+
+const IconPicker = ({currentIcon, onIconSelect}: IconPickerProps) => {
+    currentIcon = currentIcon || "CircleAlert";
+
     const [popoverOpen, setPopoverOpen] = useState(false);
-    const [selectedIconName, setSelectedIconName] = useState<IconName>("Trash");
-
     const [search, setSearch] = useState("");
     const [iconsDisplayed, setIconsDisplayed] = useState<LucideIcon[]>([]);
     const [limit, setLimit] = useState(50);
 
-    const iconNames = Object.keys(icons) as IconName[];
-
-    const filteredIcons = iconNames
-        .filter((name) => name.toLowerCase().includes(search.toLowerCase()))
-        .map(name => icons[name]);
+    const filteredIcons = useMemo(() => {
+        return iconNames
+            .filter((name) => name.toLowerCase().includes(search.toLowerCase()))
+            .map(name => icons[name]);
+    }, [search, iconNames]);
 
     const loadMoreIcons = () => {
         const nextLimit = limit + 50;
@@ -46,15 +53,17 @@ const IconPicker = () => {
     }, [search, limit]);
 
     const handleSelect = (iconName: string) => {
-        setSelectedIconName(iconName as IconName);
-        setPopoverOpen(false)
+        if (onIconSelect) {
+            onIconSelect(iconName as IconName);
+        }
+        setPopoverOpen(false);
     }
 
-    const SelectedIcon = icons[selectedIconName];
+    const SelectedIcon = icons[currentIcon];
     return (
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
             <PopoverTrigger asChild>
-                <Button variant="outline">
+                <Button variant="outline" className="w-full">
                     <SelectedIcon/>
                 </Button>
             </PopoverTrigger>

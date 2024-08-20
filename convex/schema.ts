@@ -7,7 +7,6 @@ const schema = defineSchema({
     habitGroups: defineTable({
         name: v.string(),
         icon: v.string(),
-        description: v.optional(v.string()),
         userId: v.id("users"),
     }),
     habitItems: defineTable({

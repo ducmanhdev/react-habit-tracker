@@ -9,7 +9,8 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import {Id} from "../../convex/_generated/dataModel";
 import {useMutation} from "convex/react";
 import {api} from "../../convex/_generated/api";
-import {toast} from "sonner"
+import {toast} from "sonner";
+import IconPicker, {IconName} from "@/components/IconPicker.tsx"
 
 const formSchema = z.object({
     name: z.string().min(1, "Please enter name of habit group"),
@@ -19,12 +20,12 @@ const formSchema = z.object({
 type InitialModalAddGroupValue = {
     id?: Id<"habitGroups">,
     name: string,
-    icon: string,
+    icon?: IconName,
 }
 
 const INITIAL_VALUE_MODAL_ADD_GROUP: InitialModalAddGroupValue = {
     name: '',
-    icon: '',
+    icon: undefined,
 }
 
 export type ModalAddHabitGroupRef = {
@@ -101,6 +102,7 @@ const ModalAddHabitGroup = forwardRef((_props, ref) => {
             setDeleteLoading(false)
         }
     }
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent>
@@ -117,7 +119,10 @@ const ModalAddHabitGroup = forwardRef((_props, ref) => {
                                 <FormItem>
                                     <FormLabel>Icon</FormLabel>
                                     <FormControl>
-                                        <Input {...field} />
+                                        <IconPicker
+                                            currentIcon={field.value as IconName}
+                                            onIconSelect={(iconName) => form.setValue('icon', iconName)}
+                                        />
                                     </FormControl>
                                     <FormMessage/>
                                 </FormItem>

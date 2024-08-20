@@ -8,11 +8,10 @@ import {
 } from "@/components/ui/dropdown-menu.tsx"
 import {Button} from "@/components/ui/button.tsx";
 import {Separator} from "@/components/ui/separator.tsx"
-import Icon, {IconProps} from "@/components/Icon.tsx"
 import {useAuthActions} from "@convex-dev/auth/react";
 import {useQuery} from "convex/react";
 import {api} from "../../../convex/_generated/api";
-import {Pencil} from "lucide-react";
+import {icons, Pencil} from "lucide-react";
 import {Avatar, AvatarImage, AvatarFallback} from "@/components/ui/avatar.tsx";
 import ModalAddHabitGroup, {ModalAddHabitGroupRef} from "@/components/ModalAddHabitGroup.tsx";
 
@@ -20,15 +19,16 @@ type AsideMenuItemProps = {
     id?: number | string;
     route?: NavLinkProps['to'];
     onClick?: () => void;
-    icon: string;
+    icon: keyof typeof icons;
     label: string;
     suffixIcon?: ReactNode;
 }
 
 const AsideMenuItem = ({id, icon, label, route, onClick, suffixIcon}: AsideMenuItemProps) => {
+    const Icon = icons[icon];
     const content = (
         <>
-            <Icon key={id} name={icon as IconProps['name']}/>
+            <Icon/>
             {label}
             {suffixIcon}
         </>
@@ -65,7 +65,7 @@ const Aside = () => {
     const habitGroups = useQuery(api.habits.getHabitGroups);
 
     const main: AsideMenuItemProps[] = [
-        {id: 1, label: "All habits", icon: "square-library", route: "/habits"},
+        {id: 1, label: "All habits", icon: "SquareLibrary", route: "/habits"},
     ]
 
     const modalAddHabitGroupRef = useRef<ModalAddHabitGroupRef>(null);
@@ -73,26 +73,26 @@ const Aside = () => {
         ...(habitGroups || []).map(group => ({
             id: group._id,
             label: group.name,
-            icon: group.icon,
+            icon: group.icon as AsideMenuItemProps["icon"],
             route: `/habits/${group._id}`,
             suffixIcon: <Pencil
                 onClick={() => modalAddHabitGroupRef?.current?.open({
                     id: group._id,
-                    icon: group.icon,
+                    icon: group.icon as AsideMenuItemProps["icon"],
                     name: group.name
                 })}/>,
         })),
         {
             id: '',
             label: 'Add new group',
-            icon: 'plus',
+            icon: 'Plus',
             onClick: () => modalAddHabitGroupRef?.current?.open(),
         }
     ]
 
     const settings: AsideMenuItemProps[] = [
-        {id: 1, label: "Manage habits", icon: "list", route: "/manage-habits"},
-        {id: 2, label: "App settings", icon: "settings", route: "/settings"},
+        {id: 1, label: "Manage habits", icon: "List", route: "/manage-habits"},
+        {id: 2, label: "App settings", icon: "Settings", route: "/settings"},
     ]
 
     const navGroups = [

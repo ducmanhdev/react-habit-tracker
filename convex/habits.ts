@@ -1,6 +1,6 @@
 import {mutation, query} from "./_generated/server";
-import {ConvexError, v} from "convex/values";
-import {auth} from "./auth";
+import {v} from "convex/values";
+import {getUserId} from "./utils";
 
 export const getHabitGroups = query({
     args: {},
@@ -14,10 +14,7 @@ export const addHabitGroup = mutation({
         icon: v.string(),
     },
     handler: async (ctx, args) => {
-        const userId = await auth.getUserId(ctx);
-        if (userId === null) {
-            throw new ConvexError("You must be logged in to perform this action.");
-        }
+        const userId = await getUserId(ctx);
         return await ctx.db.insert("habitGroups", {
             userId: userId,
             name: args.name,
@@ -33,10 +30,7 @@ export const updateHabitGroup = mutation({
         icon: v.string(),
     },
     handler: async (ctx, args) => {
-        const userId = await auth.getUserId(ctx);
-        if (userId === null) {
-            throw new ConvexError("You must be logged in to perform this action.");
-        }
+        await getUserId(ctx);
         return await ctx.db.patch(args.id, {
             name: args.name,
             icon: args.icon,
@@ -49,10 +43,7 @@ export const deleteHabitGroup = mutation({
         id: v.id("habitGroups"),
     },
     handler: async (ctx, args) => {
-        const userId = await auth.getUserId(ctx);
-        if (userId === null) {
-            throw new ConvexError("You must be logged in to perform this action.");
-        }
+        await getUserId(ctx);
         return await ctx.db.delete(args.id)
     },
 });

@@ -1,7 +1,7 @@
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {ChartConfig, ChartContainer} from "@/components/ui/chart.tsx";
 import {Bar, BarChart} from "recharts";
-import {Habit} from "@/types/habits.ts";
+import {Doc} from "../../../convex/_generated/dataModel";
 
 const chartConfig = {
     desktop: {
@@ -15,11 +15,11 @@ const chartConfig = {
 } satisfies ChartConfig
 
 type HabitBoardProps = {
-    currentHabit: Habit
+    currentHabit: Doc<"habitItems">
 }
 
 const HabitBoard = ({currentHabit}: HabitBoardProps) => {
-    console.log(currentHabit.id)
+    console.log(currentHabit._id)
     const chartData = [
         {month: "January", desktop: 186, mobile: 80},
         {month: "February", desktop: 305, mobile: 200},

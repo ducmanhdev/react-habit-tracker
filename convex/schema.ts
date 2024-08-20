@@ -17,7 +17,7 @@ const schema = defineSchema({
         target: v.optional(v.number()),
         unit: v.optional(v.string()),
         streak: v.number(),
-        lastCompleted: v.optional(v.string()),
+        lastCompleted: v.optional(v.number()),
     }),
 });
 

@@ -2,10 +2,10 @@ import {useState} from "react";
 import {Button} from "@/components/ui/button.tsx";
 import {Pencil, Trash} from "lucide-react";
 import DatePicker from "@/components/DatePicker.tsx";
-import {Habit} from "@/types/habits.ts";
+import {Doc} from "../../../convex/_generated/dataModel";
 
 type RightBarProps = {
-    currentHabit: Habit
+    currentHabit: Doc<"habitItems">
 }
 
 const RightBar = ({currentHabit}: RightBarProps) => {
@@ -13,7 +13,7 @@ const RightBar = ({currentHabit}: RightBarProps) => {
 
     return (
         <nav className="p-4 flex gap-2 justify-between items-center">
-            <h2>{currentHabit.title}</h2>
+            <h2>{currentHabit.name}</h2>
             <div className="flex gap-2">
                 <Button variant="outline">
                     <Pencil />

@@ -4,7 +4,7 @@ import {ArrowUpDown, Calendar, Plus, Search} from "lucide-react";
 import DatePicker from "@/components/DatePicker.tsx";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select.tsx";
 import {Input} from "@/components/ui/input.tsx";
-
+import dayjs from "dayjs";
 export type FilteredData = {
     search: string | undefined;
     order: string;
@@ -19,8 +19,6 @@ type PageHabitsLeftBarProps = {
 const LeftBar = ({habitGroupId, onFilter}: PageHabitsLeftBarProps) => {
     console.log(habitGroupId)
     const orderOptions = [
-        {value: "created-date", label: "Created Date"},
-        {value: "reminder-date", label: "Reminder Date"},
         {value: "a-z", label: "A-Z"},
         {value: "z-a", label: "Z-A"},
     ];

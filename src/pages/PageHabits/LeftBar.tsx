@@ -17,6 +17,7 @@ type PageHabitsLeftBarProps = {
 }
 
 const LeftBar = ({habitGroupId, onFilter}: PageHabitsLeftBarProps) => {
+    console.log(habitGroupId)
     const orderOptions = [
         {value: "created-date", label: "Created Date"},
         {value: "reminder-date", label: "Reminder Date"},
@@ -61,6 +62,7 @@ const LeftBar = ({habitGroupId, onFilter}: PageHabitsLeftBarProps) => {
                             ref={inputRef}
                             onChange={(e) => setSearch(e.target.value)}
                             onBlur={handleSearchBarBlur}
+                            className="w-[190px]"
                         /> :
                         <Button
                             variant="outline"
@@ -77,7 +79,7 @@ const LeftBar = ({habitGroupId, onFilter}: PageHabitsLeftBarProps) => {
                         >
                             <Calendar/>
                         </Button> :
-                        <DatePicker value={date} onChange={setDate}/>
+                        <DatePicker value={date} onChange={setDate} buttonClasses="w-[190px]"/>
                 }
                 <Select value={order} onValueChange={setOrder}>
                     <SelectTrigger className="w-[180px]">
@@ -92,9 +94,8 @@ const LeftBar = ({habitGroupId, onFilter}: PageHabitsLeftBarProps) => {
                         ))}
                     </SelectContent>
                 </Select>
-                <Button variant="default">
+                <Button variant="default" size="icon">
                     <Plus/>
-                    Add new habit
                 </Button>
             </div>
         </nav>

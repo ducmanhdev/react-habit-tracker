@@ -1,4 +1,4 @@
-import {ReactNode, useRef} from "react";
+import {useRef, cloneElement, ReactElement} from "react";
 import {NavLink, Link, NavLinkProps} from "react-router-dom";
 import {
     DropdownMenu,
@@ -21,16 +21,16 @@ type AsideMenuItemProps = {
     onClick?: () => void;
     icon: keyof typeof icons;
     label: string;
-    suffixIcon?: ReactNode;
+    suffixIcon?: ReactElement;
 }
 
 const AsideMenuItem = ({id, icon, label, route, onClick, suffixIcon}: AsideMenuItemProps) => {
     const Icon = icons[icon];
     const content = (
         <>
-            <Icon/>
-            {label}
-            {suffixIcon}
+            <Icon className="flex-shrink-0"/>
+            <span className="flex-grow overflow-hidden text-ellipsis">{label}</span>
+            {suffixIcon && cloneElement(suffixIcon, {className: "flex-shrink-0"})}
         </>
     );
 
@@ -39,14 +39,14 @@ const AsideMenuItem = ({id, icon, label, route, onClick, suffixIcon}: AsideMenuI
             key={id}
             asChild
             variant="ghost"
-            className="w-full justify-start inline-grid grid-cols-[auto_1fr_auto] cursor-pointer"
+            className="w-full justify-start inline-flex cursor-pointer text-ellipsis"
             onClick={onClick}
         >
             {route ? (
                 <NavLink
                     to={route}
                     end
-                    className={({isActive}) => `${isActive ? "text-white" : ""}`}
+                    className={({isActive}) => isActive ? "text-white" : ""}
                 >
                     {content}
                 </NavLink>

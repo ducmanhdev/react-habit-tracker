@@ -1,8 +1,8 @@
 import {ConvexError} from "convex/values";
+import { QueryCtx } from "./_generated/server";
 import {auth} from "./auth";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getUserId = async (ctx: any) => {
+export const getUserId = async (ctx: QueryCtx) => {
     const userId = await auth.getUserId(ctx);
     if (userId === null) {
         throw new ConvexError("Unauthenticated");
@@ -10,8 +10,7 @@ export const getUserId = async (ctx: any) => {
     return userId;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getUserIdentity = async (ctx: any) => {
+export const getUserIdentity = async (ctx: QueryCtx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (identity === null) {
         throw new Error("Unauthenticated");

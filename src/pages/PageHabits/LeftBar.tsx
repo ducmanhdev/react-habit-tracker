@@ -3,8 +3,9 @@ import {Button} from "@/components/ui/button.tsx";
 import {ArrowUpDown, Calendar, Plus, Search} from "lucide-react";
 import DatePicker from "@/components/DatePicker.tsx";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select.tsx";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip"
 import {Input} from "@/components/ui/input.tsx";
-import dayjs from "dayjs";
+
 export type FilteredData = {
     search: string | undefined;
     order: string;
@@ -12,12 +13,11 @@ export type FilteredData = {
 }
 
 type PageHabitsLeftBarProps = {
-    habitGroupId: string | undefined;
     onFilter: (filteredData: FilteredData) => void;
+    onCreateHabit: () => void;
 }
 
-const LeftBar = ({habitGroupId, onFilter}: PageHabitsLeftBarProps) => {
-    console.log(habitGroupId)
+const LeftBar = ({onFilter, onCreateHabit}: PageHabitsLeftBarProps) => {
     const orderOptions = [
         {value: "a-z", label: "A-Z"},
         {value: "z-a", label: "Z-A"},
@@ -92,9 +92,22 @@ const LeftBar = ({habitGroupId, onFilter}: PageHabitsLeftBarProps) => {
                         ))}
                     </SelectContent>
                 </Select>
-                <Button variant="default" size="icon">
-                    <Plus/>
-                </Button>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="default"
+                                size="icon"
+                                onClick={onCreateHabit}
+                            >
+                                <Plus/>
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Create new habit</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
             </div>
         </nav>
     )

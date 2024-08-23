@@ -1,3 +1,4 @@
+import {useState} from "react"
 import {addDays, format} from "date-fns"
 import {Calendar as CalendarIcon} from "lucide-react"
 
@@ -24,8 +25,13 @@ type DatePickerProps = {
 }
 
 const DatePicker = ({value, onChange, buttonClasses}: DatePickerProps) => {
+    const [open, setOpen] = useState(false);
+    const handleOnChange = (date: Parameters<typeof onChange>[number]) => {
+        onChange(date);
+        setOpen(false);
+    }
     return (
-        <Popover>
+        <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button
                     variant={"outline"}
@@ -42,7 +48,7 @@ const DatePicker = ({value, onChange, buttonClasses}: DatePickerProps) => {
             <PopoverContent className="flex w-auto flex-col space-y-2 p-2">
                 <Select
                     onValueChange={(value) =>
-                        onChange(addDays(new Date(), parseInt(value)))
+                        handleOnChange(addDays(new Date(), parseInt(value)))
                     }
                 >
                     <SelectTrigger>
@@ -56,7 +62,7 @@ const DatePicker = ({value, onChange, buttonClasses}: DatePickerProps) => {
                     </SelectContent>
                 </Select>
                 <div className="rounded-md border">
-                    <Calendar mode="single" selected={value} onSelect={onChange}/>
+                    <Calendar mode="single" selected={value} onSelect={handleOnChange}/>
                 </div>
             </PopoverContent>
         </Popover>

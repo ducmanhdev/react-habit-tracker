@@ -3,6 +3,7 @@ import {filter} from "convex-helpers/server/filter";
 import {ConvexError, v} from "convex/values";
 import {getUserId} from "./utils";
 import dayjs from "dayjs";
+import {HABIT_GOAL_TIME_UNITS, HABIT_GOAL_UNITS, HABIT_SCHEDULE_TYPES} from "../src/constants/habits";
 
 // TODO Optimize update record;
 
@@ -103,28 +104,15 @@ export const addHabitItem = mutation({
         icon: v.optional(v.string()),
         groupId: v.optional(v.id("habitGroups")),
         schedule: v.object({
-            type: v.union(
-                v.literal("daily"),
-                v.literal("weekly"),
-                v.literal("monthly"),
-                v.literal("custom"),
-            ),
+            type: v.union(...HABIT_SCHEDULE_TYPES.map(v.literal)),
             daysOfWeek: v.optional(v.array(v.number())),
             daysOfMonth: v.optional(v.array(v.number())),
             interval: v.optional(v.number()),
         }),
         goal: v.object({
             target: v.number(),
-            unit: v.union(
-                v.literal("times"),
-                v.literal("minutes"),
-                v.literal("glasses"),
-            ),
-            timeUnit: v.union(
-                v.literal("day"),
-                v.literal("week"),
-                v.literal("month"),
-            ),
+            unit: v.union(...HABIT_GOAL_UNITS.map(v.literal)),
+            timeUnit: v.union(...HABIT_GOAL_TIME_UNITS.map(v.literal)),
         }),
         startDate: v.number(),
     },
@@ -159,28 +147,15 @@ export const updateHabitItem = mutation({
         name: v.optional(v.string()),
         icon: v.optional(v.string()),
         schedule: v.optional(v.object({
-            type: v.optional(v.union(
-                v.literal("daily"),
-                v.literal("weekly"),
-                v.literal("monthly"),
-                v.literal("custom"),
-            )),
+            type: v.union(...HABIT_SCHEDULE_TYPES.map(v.literal)),
             daysOfWeek: v.optional(v.array(v.number())),
             daysOfMonth: v.optional(v.array(v.number())),
             interval: v.optional(v.number()),
         })),
         goal: v.optional(v.object({
-            target: v.optional(v.number()),
-            unit: v.optional(v.union(
-                v.literal("times"),
-                v.literal("minutes"),
-                v.literal("glasses"),
-            )),
-            timeUnit: v.optional(v.union(
-                v.literal("day"),
-                v.literal("week"),
-                v.literal("month"),
-            )),
+            target: v.number(),
+            unit: v.union(...HABIT_GOAL_UNITS.map(v.literal)),
+            timeUnit: v.union(...HABIT_GOAL_TIME_UNITS.map(v.literal)),
         })),
         streak: v.optional(v.number()),
         lastCompleted: v.optional(v.number()),

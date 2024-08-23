@@ -1,9 +1,14 @@
 import {forwardRef, useImperativeHandle, useState} from "react";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog.tsx";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form.tsx";
+import {
+    DropdownMenu, DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {Input} from "@/components/ui/input.tsx";
 import {Button} from "@/components/ui/button.tsx";
-import {useForm} from "react-hook-form";
+import {useForm, useWatch} from "react-hook-form";
 import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Id} from "../../convex/_generated/dataModel";
@@ -13,55 +18,125 @@ import {toast} from "sonner";
 import IconPicker, {IconName} from "@/components/IconPicker.tsx";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select.tsx";
 import DatePicker from "@/components/DatePicker.tsx";
+import {HABIT_SCHEDULE_TYPES, HABIT_GOAL_UNITS, HABIT_GOAL_TIME_UNITS} from "@/constants/habits.ts";
 import dayjs from "dayjs";
+import {toCapitalCase} from "@/utils";
+import {DAYS_OF_WEEKS} from "@/constants/dates.ts";
+import {ScrollArea} from "@/components/ui/scroll-area.tsx";
 
-const formSchema = z.object({
-    name: z.string().min(1, "Please enter the name of the habit"),
-    icon: z.optional(z.string()),
-    schedule: z.object({
-        type: z.enum(["daily", "weekly", "monthly", "custom"]),
-        daysOfWeek: z.optional(z.array(z.number())),
-        daysOfMonth: z.optional(z.array(z.number())),
-        interval: z.optional(z.number()),
-    }),
-    goal: z.object({
-        target: z.number().min(1, "Target must be at least 1"),
-        unit: z.enum(["times", "minutes", "glasses"]),
-        timeUnit: z.enum(["day", "week", "month"]),
-    }),
-    startDate: z.number().min(1)
-});
+type Option<T = string> = { label: string; value: T };
 
-type ScheduleType = "daily" | "weekly" | "monthly" | "custom";
-type GoalUnit = "times" | "minutes" | "glasses";
-type GoalTimeUnit = "day" | "week" | "month";
-
-type InitialModalHabitItemValue = {
-    id?: Id<"habitItems">,
-    name: string,
-    icon?: IconName,
-    schedule: {
-        type: ScheduleType,
-        daysOfWeek?: number[],
-        daysOfMonth?: number[],
-        interval?: number,
-    },
-    goal: {
-        target: number,
-        unit: GoalUnit,
-        timeUnit: GoalTimeUnit,
-    },
-    startDate: number,
+type DropdownSelectProps<T> = {
+    options: Option<T>[],
+    value: T | T[],
+    multiple?: boolean,
+    onChange: (value: T | T[]) => void,
+    labelFormat?: (selectedOptions: Option<T>[]) => string,
 };
 
-const INITIAL_VALUE_MODAL_HABIT_ITEM: InitialModalHabitItemValue = {
+const DropdownSelect = <T extends string | number>({
+                                                       options,
+                                                       value,
+                                                       multiple = false,
+                                                       onChange,
+                                                       labelFormat,
+                                                   }: DropdownSelectProps<T>) => {
+    const handleOnCheckedChange = (optionValue: T) => () => {
+        if (multiple) {
+            const prevValue = (value as T[]) || [];
+            const finalValue = prevValue.includes(optionValue)
+                ? prevValue.filter((item) => item !== optionValue)
+                : [...prevValue, optionValue];
+            onChange(finalValue);
+        } else {
+            onChange(optionValue);
+        }
+    };
+
+    const selectedLabels = multiple
+        ? options.filter((item) => (value as T[]).includes(item.value))
+        : options.filter((item) => item.value === value);
+
+    const displayLabel = labelFormat
+        ? labelFormat(selectedLabels)
+        : selectedLabels.map((item) => item.label).join(", ") || "Select items";
+
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full justify-start">
+                    {displayLabel}
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+                <ScrollArea>
+                    {options.map(({label, value: optionValue}) => (
+                        <DropdownMenuCheckboxItem
+                            key={optionValue}
+                            onSelect={(e) => multiple && e.preventDefault()}
+                            checked={multiple ? (value as T[]).includes(optionValue) : value === optionValue}
+                            onCheckedChange={handleOnCheckedChange(optionValue)}
+                        >
+                            {label}
+                        </DropdownMenuCheckboxItem>
+                    ))}
+                </ScrollArea>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+};
+
+const scheduleSchema = z.object({
+    type: z.enum(HABIT_SCHEDULE_TYPES),
+    daysOfWeek: z.optional(z.array(z.number())),
+    daysOfMonth: z.optional(z.array(z.number())),
+    interval: z.optional(z.number()),
+}).refine(data => {
+    switch (data.type) {
+        case "daily":
+            return data.daysOfWeek === undefined &&
+                data.daysOfMonth === undefined &&
+                data.interval === undefined;
+        case "monthly":
+            return data.daysOfMonth !== undefined && data.daysOfMonth.length > 0;
+        case "custom":
+            return data.interval !== undefined && data.interval > 0;
+        default:
+            return false;
+    }
+}, {
+    message: "Validation failed for schedule type"
+});
+
+const formSchema = z.object({
+    name: z.string()
+        .min(1, {message: "Please enter the name of the habit"}),
+    icon: z.optional(z.string()),
+    schedule: scheduleSchema,
+    goal: z.object({
+        target: z.number()
+            .min(1, {message: "Target must be at least 1"}),
+        unit: z.enum(HABIT_GOAL_UNITS, {
+            invalid_type_error: "Invalid goal unit"
+        }),
+        timeUnit: z.enum(HABIT_GOAL_TIME_UNITS, {
+            invalid_type_error: "Invalid goal time unit"
+        }),
+    }),
+    startDate: z.number()
+        .min(1, {message: "Start date must be a valid number"})
+});
+
+type FormData = z.infer<typeof formSchema> & { id?: Id<"habitItems"> };
+
+const INITIAL_VALUE_MODAL_HABIT_ITEM: FormData = {
     name: '',
     icon: undefined,
     schedule: {
         type: "daily",
-        daysOfWeek: [0, 1, 2, 3, 4, 5],
-        daysOfMonth: undefined,
-        interval: undefined,
+        daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+        daysOfMonth: [],
+        interval: 2,
     },
     goal: {
         target: 1,
@@ -71,62 +146,32 @@ const INITIAL_VALUE_MODAL_HABIT_ITEM: InitialModalHabitItemValue = {
     startDate: dayjs().valueOf()
 };
 
-const SCHEDULE_TYPE_OPTIONS: { label: string; value: ScheduleType }[] = [
-    {
-        label: "Daily",
-        value: "daily",
-    },
-    {
-        label: "Weekly",
-        value: "weekly",
-    },
-    {
-        label: "Monthly",
-        value: "monthly",
-    },
-    {
-        label: "Custom",
-        value: "custom",
-    }
-];
+type HabitScheduleTypes = (typeof HABIT_SCHEDULE_TYPES)[number];
+type HabitGoalUnits = (typeof HABIT_GOAL_UNITS)[number];
+type HabitTimeUnits = (typeof HABIT_GOAL_TIME_UNITS)[number];
 
-const GOAL_UNIT_OPTIONS: { label: string; value: GoalUnit }[] = [
-    {
-        label: "Times",
-        value: "times",
-    },
-    {
-        label: "Minutes",
-        value: "minutes",
-    },
-    {
-        label: "Glasses",
-        value: "glasses",
-    },
-];
+const SCHEDULE_TYPE_OPTIONS: Option<HabitScheduleTypes>[] = HABIT_SCHEDULE_TYPES.map(item => ({
+    label: toCapitalCase(item),
+    value: item,
+}));
 
-const GOAL_UNIT_TIME_OPTIONS: { label: string; value: GoalTimeUnit }[] = [
-    {
-        label: "Day",
-        value: "day",
-    },
-    {
-        label: "Week",
-        value: "week",
-    },
-    {
-        label: "Month",
-        value: "month",
-    },
-];
+const GOAL_UNIT_OPTIONS: Option<HabitGoalUnits>[] = HABIT_GOAL_UNITS.map(item => ({
+    label: toCapitalCase(item),
+    value: item,
+}))
+
+const GOAL_UNIT_TIME_OPTIONS: Option<HabitTimeUnits>[] = HABIT_GOAL_TIME_UNITS.map(item => ({
+    label: toCapitalCase(item),
+    value: item,
+}))
 
 export type ModalAddHabitItemRef = {
-    open: (initialValue?: InitialModalHabitItemValue) => void
+    open: (initialValue?: FormData) => void
 }
 
 const ModalHabitItem = forwardRef((_props, ref) => {
     useImperativeHandle(ref, () => ({
-        open: (initialValue?: InitialModalHabitItemValue) => {
+        open: (initialValue?: FormData) => {
             if (initialValue) {
                 setItemId(initialValue?.id);
                 form.reset({
@@ -147,7 +192,7 @@ const ModalHabitItem = forwardRef((_props, ref) => {
     const del = useMutation(api.habits.deleteHabitItem);
 
     const [open, setOpen] = useState(false);
-    const [itemId, setItemId] = useState<InitialModalHabitItemValue["id"]>();
+    const [itemId, setItemId] = useState<FormData["id"]>();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
     });
@@ -190,6 +235,11 @@ const ModalHabitItem = forwardRef((_props, ref) => {
             setDeleteLoading(false);
         }
     };
+
+    const scheduleType = useWatch({
+        control: form.control,
+        name: "schedule.type",
+    });
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -252,14 +302,17 @@ const ModalHabitItem = forwardRef((_props, ref) => {
                                     <FormItem>
                                         <FormLabel>Unit</FormLabel>
                                         <FormControl>
-                                            <Select>
+                                            <Select
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                            >
                                                 <SelectTrigger>
-                                                    <SelectValue {...field}/>
+                                                    <SelectValue/>
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {
                                                         GOAL_UNIT_OPTIONS.map(({label, value}) => (
-                                                            <SelectItem value={value}>{label}</SelectItem>
+                                                            <SelectItem key={label} value={value}>{label}</SelectItem>
                                                         ))
                                                     }
                                                 </SelectContent>
@@ -276,14 +329,17 @@ const ModalHabitItem = forwardRef((_props, ref) => {
                                     <FormItem>
                                         <FormLabel>Time Unit</FormLabel>
                                         <FormControl>
-                                            <Select>
+                                            <Select
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                            >
                                                 <SelectTrigger>
-                                                    <SelectValue {...field}/>
+                                                    <SelectValue/>
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {
                                                         GOAL_UNIT_TIME_OPTIONS.map(({label, value}) => (
-                                                            <SelectItem value={value}>{label}</SelectItem>
+                                                            <SelectItem key={label} value={value}>{label}</SelectItem>
                                                         ))
                                                     }
                                                 </SelectContent>
@@ -301,14 +357,17 @@ const ModalHabitItem = forwardRef((_props, ref) => {
                                 <FormItem>
                                     <FormLabel>Repeat</FormLabel>
                                     <FormControl>
-                                        <Select>
+                                        <Select
+                                            value={field.value}
+                                            onValueChange={field.onChange}
+                                        >
                                             <SelectTrigger>
-                                                <SelectValue {...field}/>
+                                                <SelectValue/>
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {
                                                     SCHEDULE_TYPE_OPTIONS.map(({label, value}) => (
-                                                        <SelectItem value={value}>{label}</SelectItem>
+                                                        <SelectItem key={label} value={value}>{label}</SelectItem>
                                                     ))
                                                 }
                                             </SelectContent>
@@ -318,17 +377,96 @@ const ModalHabitItem = forwardRef((_props, ref) => {
                                 </FormItem>
                             )}
                         />
+                        {
+                            scheduleType === "daily" &&
+                            (
+                                <FormField
+                                    control={form.control}
+                                    name="schedule.daysOfWeek"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Days of week</FormLabel>
+                                            <FormControl>
+                                                <DropdownSelect
+                                                    multiple
+                                                    options={DAYS_OF_WEEKS.map((item, index) => ({
+                                                        label: item,
+                                                        value: index
+                                                    }))}
+                                                    value={field.value || []}
+                                                    onChange={value => form.setValue("schedule.daysOfWeek", value as number[])}
+                                                />
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+                            )
+                        }
+                        {
+                            scheduleType === "monthly" &&
+                            (
+                                <FormField
+                                    control={form.control}
+                                    name="schedule.daysOfMonth"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Days of month</FormLabel>
+                                            <FormControl>
+                                                <DropdownSelect
+                                                    multiple
+                                                    options={Array.from({length: 31}, (_, index) => ({
+                                                        label: index.toString(),
+                                                        value: index
+                                                    }))}
+                                                    value={field.value || []}
+                                                    onChange={value => form.setValue("schedule.daysOfMonth", value as number[])}
+                                                />
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+                            )
+                        }
+                        {
+                            scheduleType === "custom" &&
+                            (
+                                <FormField
+                                    control={form.control}
+                                    name="schedule.interval"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Interval</FormLabel>
+                                            <FormControl>
+                                                <DropdownSelect
+                                                    options={Array.from({length: 6}, (_, index) => index + 2).map(item => ({
+                                                        label: item.toString(),
+                                                        value: item
+                                                    }))}
+                                                    value={field.value!}
+                                                    onChange={value => form.setValue("schedule.interval", value as number)}
+                                                    labelFormat={(selectedOptions) => `Repeat every ${selectedOptions[0]?.value} dates`}
+                                                />
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+                            )
+                        }
                         <FormField
                             control={form.control}
-                            name="schedule.type"
+                            name="startDate"
                             render={({field}) => (
                                 <FormItem>
                                     <FormLabel>Start date</FormLabel>
                                     <FormControl>
-                                        {/*<DatePicker*/}
-                                        {/*    value={dayjs(field.value).toDate()}*/}
-                                        {/*    onChange={date => form.setValue('startDate', dayjs(date).valueOf())}*/}
-                                        {/*/>*/}
+                                        <DatePicker
+                                            buttonClasses="w-full"
+                                            value={dayjs(field.value).toDate()}
+                                            onChange={date => form.setValue('startDate', dayjs(date).valueOf())}
+                                        />
                                     </FormControl>
                                     <FormMessage/>
                                 </FormItem>

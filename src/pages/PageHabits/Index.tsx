@@ -4,12 +4,13 @@ import {useParams} from "react-router-dom";
 import {useRef, useState} from "react";
 import RightBar from "@/pages/PageHabits/RightBar.tsx";
 import HabitBoard from "@/pages/PageHabits/HabitBoard.tsx";
-import HabitList from "@/pages/PageHabits/HabitList.tsx";
+import CardHabitsEmpty from "./CardHabitsEmpty.tsx";
 import ModalAddHabitItem from "@/components/ModalAddHabitItem.tsx";
 import {useQuery} from "convex/react";
 import {api} from "../../../convex/_generated/api";
 import {Doc, Id} from "../../../convex/_generated/dataModel";
 import {ModalAddHabitItemRef} from "@/components/ModalAddHabitItem.tsx";
+import HabitItem from "@/components/HabitItem.tsx";
 
 const Index = () => {
     const {habitGroupId} = useParams();
@@ -22,6 +23,7 @@ const Index = () => {
         order: filteredHabits?.order,
         groupId: habitGroupId as Id<"habitGroups">
     });
+
     const modalAddHabitIemRef = useRef<ModalAddHabitItemRef>(null);
 
     return (
@@ -33,11 +35,29 @@ const Index = () => {
                         onCreateHabit={() => modalAddHabitIemRef?.current?.open()}
                     />
                     <Separator/>
-                    <HabitList
-                        items={habitItems || []}
-                        currentHabitId={currentHabit?._id}
-                        onSelectHabit={setCurrentHabit}
-                    />
+                    <div className="p-4">
+                        {
+                            (habitItems === undefined || habitItems.length === 0) ? (
+                                <CardHabitsEmpty
+                                    onCreateHabit={() => modalAddHabitIemRef?.current?.open()}
+                                />
+                            ) : (
+                                <div className="space-y-4">
+                                    {
+                                        habitItems.map(habit => (
+                                            <HabitItem
+                                                key={habit._id}
+                                                habit={habit}
+                                                isActive={habit._id === currentHabit?._id}
+                                                onClick={() => setCurrentHabit(habit)}
+                                                onEdit={() => modalAddHabitIemRef?.current?.open(habit)}
+                                            />
+                                        ))
+                                    }
+                                </div>
+                            )
+                        }
+                    </div>
                 </section>
                 {
                     currentHabit?._id && (

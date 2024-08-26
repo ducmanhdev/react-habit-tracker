@@ -5,8 +5,6 @@ import {getUserId} from "./utils";
 import dayjs from "dayjs";
 import {HABIT_GOAL_TIME_UNITS, HABIT_GOAL_UNITS, HABIT_SCHEDULE_TYPES} from "../src/constants/habits";
 
-// TODO Optimize update record;
-
 export const getHabitGroups = query({
     args: {},
     handler: async (ctx) => {
@@ -83,7 +81,7 @@ export const getHabitItems = query({
         groupId: v.optional(v.id("habitGroups")),
     },
     handler: async (ctx, {search, date, order, groupId}) => {
-        const currentDate = dayjs(date);
+        const currentDate = date && dayjs(date).isValid() ? dayjs(date) : null;
         return filter(
             ctx.db.query("habitItems"),
             (habit) => {
@@ -93,16 +91,18 @@ export const getHabitItems = query({
                 const {schedule, startDate, lastCompleted} = habit;
 
                 let shouldDoToday = false;
-                if (schedule.type === "daily" && schedule.daysOfWeek) {
-                    shouldDoToday = schedule.daysOfWeek.includes(currentDate.day());
-                } else if (schedule.type === "monthly" && schedule.daysOfMonth) {
-                    shouldDoToday = schedule.daysOfMonth.includes(currentDate.date());
-                } else if (schedule.type === "custom" && schedule.interval) {
-                    const daysSinceStart = currentDate.diff(dayjs(startDate), 'day');
-                    shouldDoToday = daysSinceStart % schedule.interval === 0;
+                if (currentDate) {
+                    if (schedule.type === "daily" && schedule.daysOfWeek) {
+                        shouldDoToday = schedule.daysOfWeek.includes(currentDate.day());
+                    } else if (schedule.type === "monthly" && schedule.daysOfMonth) {
+                        shouldDoToday = schedule.daysOfMonth.includes(currentDate.date());
+                    } else if (schedule.type === "custom" && schedule.interval) {
+                        const daysSinceStart = currentDate.diff(dayjs(startDate), 'day');
+                        shouldDoToday = daysSinceStart % schedule.interval === 0;
+                    }
                 }
 
-                const matchesDate = shouldDoToday && (!lastCompleted || !dayjs(lastCompleted).isSame(currentDate, 'date'));
+                const matchesDate = !currentDate || (shouldDoToday && (!lastCompleted || !dayjs(lastCompleted).isSame(currentDate, 'date')));
 
                 return matchesGroup && matchesSearch && matchesDate;
             }
@@ -146,7 +146,10 @@ export const addHabitItem = mutation({
             userId: userId,
             groupId: args.groupId,
             schedule: args.schedule,
-            goal: args.goal,
+            goal: {
+                ...args.goal,
+                completedCount: 0,
+            },
             startDate: args.startDate,
             streak: 0,
         });
@@ -171,14 +174,13 @@ export const updateHabitItem = mutation({
             unit: v.union(...HABIT_GOAL_UNITS.map(v.literal)),
             timeUnit: v.union(...HABIT_GOAL_TIME_UNITS.map(v.literal)),
         })),
-        streak: v.optional(v.number()),
-        lastCompleted: v.optional(v.number()),
         startDate: v.optional(v.number()),
     },
     handler: async (ctx, args) => {
         const userId = await getUserId(ctx);
 
         const habitItem = await ctx.db.get(args.id);
+
         if (!habitItem) {
             throw new ConvexError("Habit item not found");
         }
@@ -186,12 +188,46 @@ export const updateHabitItem = mutation({
             throw new ConvexError("Unauthorized to update this habit item");
         }
 
+        const id = await ctx.db.patch(habitItem._id, {
+            name: args.name || habitItem.icon,
+            icon: args.icon || habitItem.icon,
+            schedule: {
+                ...habitItem.schedule,
+                ...args.schedule,
+            },
+            goal: {
+                ...habitItem.goal,
+                ...args.goal,
+            },
+            startDate: args.startDate || habitItem.startDate
+        });
+
+        return {id};
+    },
+});
+
+export const updateCompletedCount = mutation({
+    args: {
+        id: v.id("habitItems"),
+        increment: v.number(),
+    },
+    handler: async (ctx, args) => {
+        const userId = await getUserId(ctx);
+        const habitItem = await ctx.db.get(args.id);
+
+        if (!habitItem) {
+            throw new ConvexError("Habit item not found");
+        }
+        if (habitItem.userId !== userId) {
+            throw new ConvexError("Unauthorized to update this habit item");
+        }
+
+        const newCompletedCount = (habitItem.goal?.completedCount || 0) + args.increment;
         let streak = habitItem.streak || 0;
         const lastCompleted = habitItem.lastCompleted ? dayjs(habitItem.lastCompleted) : null;
 
-        // Logic tính streak
-        if (args.lastCompleted) {
-            const newLastCompleted = dayjs(args.lastCompleted);
+        if (newCompletedCount >= habitItem.goal.target) {
+            const newLastCompleted = dayjs();
 
             if (lastCompleted) {
                 const daysSinceLastCompletion = newLastCompleted.diff(lastCompleted, "day");
@@ -205,17 +241,91 @@ export const updateHabitItem = mutation({
                 streak = 1;
             }
 
-            args.streak = streak;
-            args.lastCompleted = newLastCompleted.valueOf();
+            await ctx.db.patch(habitItem._id, {
+                goal: {
+                    ...habitItem.goal,
+                    completedCount: newCompletedCount
+                },
+                streak: streak,
+                lastCompleted: newLastCompleted.valueOf(),
+            });
+        } else {
+            await ctx.db.patch(habitItem._id, {
+                goal: {
+                    ...habitItem.goal,
+                    completedCount: newCompletedCount
+                },
+            });
         }
 
-        const filteredArgs = Object.fromEntries(
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            Object.entries(args).filter(([_, value]) => value !== undefined)
-        );
+        return {
+            id: habitItem._id,
+            completedCount: newCompletedCount,
+            streak: streak
+        };
+    },
+});
+
+export const undoCompletedCount = mutation({
+    args: {
+        id: v.id("habitItems"),
+        countToUndo: v.number(),
+    },
+    handler: async (ctx, args) => {
+        const userId = await getUserId(ctx);
+
+        const habitItem = await ctx.db.get(args.id);
+        if (!habitItem) {
+            throw new ConvexError("Habit item not found");
+        }
+        if (habitItem.userId !== userId) {
+            throw new ConvexError("Unauthorized to update this habit item");
+        }
+
+        let newCompletedCount = habitItem.goal.completedCount - args.countToUndo;
+        if (newCompletedCount < 0) {
+            newCompletedCount = 0;
+        }
+
+        let newLastCompleted = habitItem.lastCompleted;
+
+        if (newCompletedCount === 0) {
+            newLastCompleted = undefined;
+        }
 
         const id = await ctx.db.patch(habitItem._id, {
-            ...filteredArgs,
+            goal: {
+                ...habitItem.goal,
+                completedCount: newCompletedCount
+            },
+            lastCompleted: newLastCompleted,
+        });
+
+        return {id};
+    },
+});
+
+export const resetCompletedCount = mutation({
+    args: {
+        id: v.id("habitItems"),
+    },
+    handler: async (ctx, args) => {
+        const userId = await getUserId(ctx);
+
+        const habitItem = await ctx.db.get(args.id);
+        if (!habitItem) {
+            throw new ConvexError("Habit item not found");
+        }
+        if (habitItem.userId !== userId) {
+            throw new ConvexError("Unauthorized to update this habit item");
+        }
+
+        const id = await ctx.db.patch(habitItem._id, {
+            goal: {
+                ...habitItem.goal,
+                completedCount: 0,
+            },
+            lastCompleted: undefined
         });
 
         return {id};

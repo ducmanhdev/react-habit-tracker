@@ -314,7 +314,11 @@ const ModalHabitItem = forwardRef((_props, ref) => {
                                     <FormItem>
                                         <FormLabel>Target</FormLabel>
                                         <FormControl>
-                                            <Input type="number" {...field} />
+                                            <Input
+                                                type="number"
+                                                {...field}
+                                                onChange={(e) => field.onChange(Number(e.target.value))}
+                                            />
                                         </FormControl>
                                         <FormMessage/>
                                     </FormItem>

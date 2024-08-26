@@ -25,6 +25,7 @@ const schema = defineSchema({
             target: v.number(),
             unit: v.union(...HABIT_GOAL_UNITS.map(v.literal)),
             timeUnit: v.union(...HABIT_GOAL_TIME_UNITS.map(v.literal)),
+            completedCount: v.number(),
         }),
         streak: v.number(),
         lastCompleted: v.optional(v.number()),

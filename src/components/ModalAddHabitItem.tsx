@@ -417,7 +417,7 @@ const ModalHabitItem = forwardRef((_props, ref) => {
                                                     multiple
                                                     options={Array.from({length: 30}, (_, index) => ({
                                                         label: (index + 1).toString(),
-                                                        value: (index + 1)
+                                                        value: index
                                                     }))}
                                                     value={field.value || []}
                                                     onChange={value => form.setValue("schedule.daysOfMonth", value as number[])}

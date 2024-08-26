@@ -83,13 +83,27 @@ export const getHabitItems = query({
         groupId: v.optional(v.id("habitGroups")),
     },
     handler: async (ctx, {search, date, order, groupId}) => {
-        // TODO fix order and compare time
+        const currentDate = dayjs(date);
         return filter(
             ctx.db.query("habitItems"),
-            (c) => {
-                const matchesGroup = groupId ? c.groupId === groupId : true;
-                const matchesSearch = search ? c.name.toLowerCase().includes(search.toLowerCase()) : true;
-                const matchesDate = date ? dayjs(c.lastCompleted!).isSame(date, 'date') : true;
+            (habit) => {
+                const matchesGroup = groupId ? habit.groupId === groupId : true;
+                const matchesSearch = search ? habit.name.toLowerCase().includes(search.toLowerCase()) : true;
+
+                const {schedule, startDate, lastCompleted} = habit;
+
+                let shouldDoToday = false;
+                if (schedule.type === "daily" && schedule.daysOfWeek) {
+                    shouldDoToday = schedule.daysOfWeek.includes(currentDate.day());
+                } else if (schedule.type === "monthly" && schedule.daysOfMonth) {
+                    shouldDoToday = schedule.daysOfMonth.includes(currentDate.date());
+                } else if (schedule.type === "custom" && schedule.interval) {
+                    const daysSinceStart = currentDate.diff(dayjs(startDate), 'day');
+                    shouldDoToday = daysSinceStart % schedule.interval === 0;
+                }
+
+                const matchesDate = shouldDoToday && (!lastCompleted || !dayjs(lastCompleted).isSame(currentDate, 'date'));
+
                 return matchesGroup && matchesSearch && matchesDate;
             }
         )

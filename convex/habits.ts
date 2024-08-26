@@ -186,6 +186,29 @@ export const updateHabitItem = mutation({
             throw new ConvexError("Unauthorized to update this habit item");
         }
 
+        let streak = habitItem.streak || 0;
+        const lastCompleted = habitItem.lastCompleted ? dayjs(habitItem.lastCompleted) : null;
+
+        // Logic tính streak
+        if (args.lastCompleted) {
+            const newLastCompleted = dayjs(args.lastCompleted);
+
+            if (lastCompleted) {
+                const daysSinceLastCompletion = newLastCompleted.diff(lastCompleted, "day");
+
+                if (daysSinceLastCompletion === 1) {
+                    streak += 1;
+                } else if (daysSinceLastCompletion > 1) {
+                    streak = 1;
+                }
+            } else {
+                streak = 1;
+            }
+
+            args.streak = streak;
+            args.lastCompleted = newLastCompleted.valueOf();
+        }
+
         const filteredArgs = Object.fromEntries(
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             Object.entries(args).filter(([_, value]) => value !== undefined)

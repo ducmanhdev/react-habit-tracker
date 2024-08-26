@@ -91,21 +91,45 @@ const scheduleSchema = z.object({
     daysOfWeek: z.optional(z.array(z.number())),
     daysOfMonth: z.optional(z.array(z.number())),
     interval: z.optional(z.number()),
-}).refine(data => {
-    switch (data.type) {
-        case "daily":
-            return data.daysOfWeek === undefined &&
-                data.daysOfMonth === undefined &&
-                data.interval === undefined;
-        case "monthly":
-            return data.daysOfMonth !== undefined && data.daysOfMonth.length > 0;
-        case "custom":
-            return data.interval !== undefined && data.interval > 0;
-        default:
-            return false;
+}).superRefine((data, ctx) => {
+    const {type, daysOfWeek, daysOfMonth, interval} = data;
+
+    let isValid = true;
+
+    if (type === "daily") {
+        if (!daysOfWeek || !daysOfWeek.length) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ["daysOfWeek"],
+                message: "Days of week is required for daily schedule.",
+            });
+            isValid = false;
+        }
     }
-}, {
-    message: "Validation failed for schedule type"
+
+    if (type === "monthly") {
+        if (!daysOfMonth || !daysOfMonth.length) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ["daysOfMonth"],
+                message: "Days of month is required for monthly schedule.",
+            });
+            isValid = false;
+        }
+    }
+
+    if (type === "custom") {
+        if (interval === undefined || interval <= 0) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ["interval"],
+                message: "Interval is required and should be greater than 0 for custom schedule.",
+            });
+            isValid = false;
+        }
+    }
+
+    return isValid;
 });
 
 const formSchema = z.object({
@@ -198,6 +222,7 @@ const ModalHabitItem = forwardRef((_props, ref) => {
     });
     const [submitLoading, setSubmitLoading] = useState(false);
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
+        console.log({values})
         try {
             setSubmitLoading(true);
             if (itemId) {

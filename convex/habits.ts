@@ -17,7 +17,7 @@ export const getHabitGroups = query({
 export const addHabitGroup = mutation({
     args: {
         name: v.string(),
-        icon: v.string(),
+        icon: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
         const userId = await getUserId(ctx);
@@ -34,7 +34,7 @@ export const updateHabitGroup = mutation({
     args: {
         id: v.id("habitGroups"),
         name: v.string(),
-        icon: v.string(),
+        icon: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
         const userId = await getUserId(ctx);

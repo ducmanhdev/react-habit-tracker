@@ -14,38 +14,32 @@ import IconPicker, {IconName} from "@/components/IconPicker.tsx"
 
 const formSchema = z.object({
     name: z.string().min(1, "Please enter name of habit group"),
-    icon: z.string()
+    icon: z.optional(z.string()),
 })
 
-type InitialModalAddGroupValue = {
-    id?: Id<"habitGroups">,
-    name: string,
-    icon?: IconName,
-}
+type FormData = z.infer<typeof formSchema> & { id?: Id<"habitGroups"> };
 
-const INITIAL_VALUE_MODAL_ADD_GROUP: InitialModalAddGroupValue = {
+const INITIAL_VALUE_MODAL_ADD_GROUP: FormData = {
     name: '',
     icon: undefined,
 }
 
 export type ModalAddHabitGroupRef = {
-    open: (initialValue?: InitialModalAddGroupValue) => void
+    open: (initialValue?: FormData) => void
 }
 
 const ModalAddHabitGroup = forwardRef((_props, ref) => {
     useImperativeHandle(ref, () => ({
-        open: (initialValue?: InitialModalAddGroupValue) => {
+        open: (initialValue?: FormData) => {
             if (initialValue) {
                 setGroupId(initialValue?.id)
                 form.reset({
-                    icon: initialValue?.icon,
-                    name: initialValue?.name,
+                    ...initialValue
                 });
             } else {
                 setGroupId(undefined)
                 form.reset({
-                    icon: INITIAL_VALUE_MODAL_ADD_GROUP?.icon,
-                    name: INITIAL_VALUE_MODAL_ADD_GROUP?.name,
+                    ...INITIAL_VALUE_MODAL_ADD_GROUP
                 });
             }
             setOpen(true);
@@ -57,7 +51,7 @@ const ModalAddHabitGroup = forwardRef((_props, ref) => {
     const del = useMutation(api.habits.deleteHabitGroup);
 
     const [open, setOpen] = useState(false);
-    const [groupId, setGroupId] = useState<InitialModalAddGroupValue["id"]>();
+    const [groupId, setGroupId] = useState<FormData["id"]>();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
     })

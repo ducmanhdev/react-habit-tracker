@@ -69,7 +69,7 @@ const DropdownSelect = <T extends string | number>({
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-                <ScrollArea>
+                <ScrollArea className="h-72">
                     {options.map(({label, value: optionValue}) => (
                         <DropdownMenuCheckboxItem
                             key={optionValue}
@@ -135,7 +135,7 @@ const INITIAL_VALUE_MODAL_HABIT_ITEM: FormData = {
     schedule: {
         type: "daily",
         daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-        daysOfMonth: [],
+        daysOfMonth: [1],
         interval: 2,
     },
     goal: {
@@ -415,12 +415,13 @@ const ModalHabitItem = forwardRef((_props, ref) => {
                                             <FormControl>
                                                 <DropdownSelect
                                                     multiple
-                                                    options={Array.from({length: 31}, (_, index) => ({
-                                                        label: index.toString(),
-                                                        value: index
+                                                    options={Array.from({length: 30}, (_, index) => ({
+                                                        label: (index + 1).toString(),
+                                                        value: (index + 1)
                                                     }))}
                                                     value={field.value || []}
                                                     onChange={value => form.setValue("schedule.daysOfMonth", value as number[])}
+                                                    labelFormat={(selectedOptions) => `Every month in ${selectedOptions.map(item => item.value).join(", ")}`}
                                                 />
                                             </FormControl>
                                             <FormMessage/>

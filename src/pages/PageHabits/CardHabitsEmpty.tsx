@@ -4,23 +4,21 @@ import {Button} from "@/components/ui/button.tsx";
 type CardHabitsEmptyProps = {
     onCreateHabit: () => void;
 }
-const CardHabitsEmpty = ({ onCreateHabit }: CardHabitsEmptyProps) => {
+const CardHabitsEmpty = ({onCreateHabit}: CardHabitsEmptyProps) => {
     return (
-        <div className="p-4">
-            <Card className="w-full max-w-sm mx-auto">
-                <CardHeader>
-                    <CardTitle>Habits Empty</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p>You don't have any habits yet. Let's create your first one!</p>
-                </CardContent>
-                <CardFooter>
-                    <Button onClick={onCreateHabit} className="w-full">
-                        Create Habit
-                    </Button>
-                </CardFooter>
-            </Card>
-        </div>
+        <Card className="text-center">
+            <CardHeader>
+                <CardTitle>Habits Empty</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p>You don't have any habits yet. Let's create your first one!</p>
+            </CardContent>
+            <CardFooter className="justify-center">
+                <Button onClick={onCreateHabit}>
+                    Create Habit
+                </Button>
+            </CardFooter>
+        </Card>
     );
 };
 

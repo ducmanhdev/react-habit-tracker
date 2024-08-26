@@ -266,45 +266,6 @@ export const updateCompletedCount = mutation({
     },
 });
 
-export const undoCompletedCount = mutation({
-    args: {
-        id: v.id("habitItems"),
-        countToUndo: v.number(),
-    },
-    handler: async (ctx, args) => {
-        const userId = await getUserId(ctx);
-
-        const habitItem = await ctx.db.get(args.id);
-        if (!habitItem) {
-            throw new ConvexError("Habit item not found");
-        }
-        if (habitItem.userId !== userId) {
-            throw new ConvexError("Unauthorized to update this habit item");
-        }
-
-        let newCompletedCount = habitItem.goal.completedCount - args.countToUndo;
-        if (newCompletedCount < 0) {
-            newCompletedCount = 0;
-        }
-
-        let newLastCompleted = habitItem.lastCompleted;
-
-        if (newCompletedCount === 0) {
-            newLastCompleted = undefined;
-        }
-
-        const id = await ctx.db.patch(habitItem._id, {
-            goal: {
-                ...habitItem.goal,
-                completedCount: newCompletedCount
-            },
-            lastCompleted: newLastCompleted,
-        });
-
-        return {id};
-    },
-});
-
 export const resetCompletedCount = mutation({
     args: {
         id: v.id("habitItems"),

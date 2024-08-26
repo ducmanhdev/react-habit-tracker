@@ -20,7 +20,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/c
 import DatePicker from "@/components/DatePicker.tsx";
 import {HABIT_SCHEDULE_TYPES, HABIT_GOAL_UNITS, HABIT_GOAL_TIME_UNITS} from "@/constants/habits.ts";
 import dayjs from "dayjs";
-import {toCapitalCase} from "@/utils";
+import {convertToCapitalCase} from "@/utils/text.ts";
 import {DAYS_OF_WEEKS} from "@/constants/dates.ts";
 import {ScrollArea} from "@/components/ui/scroll-area.tsx";
 
@@ -175,17 +175,17 @@ type HabitGoalUnits = (typeof HABIT_GOAL_UNITS)[number];
 type HabitTimeUnits = (typeof HABIT_GOAL_TIME_UNITS)[number];
 
 const SCHEDULE_TYPE_OPTIONS: Option<HabitScheduleTypes>[] = HABIT_SCHEDULE_TYPES.map(item => ({
-    label: toCapitalCase(item),
+    label: convertToCapitalCase(item),
     value: item,
 }));
 
 const GOAL_UNIT_OPTIONS: Option<HabitGoalUnits>[] = HABIT_GOAL_UNITS.map(item => ({
-    label: toCapitalCase(item),
+    label: convertToCapitalCase(item),
     value: item,
 }))
 
 const GOAL_UNIT_TIME_OPTIONS: Option<HabitTimeUnits>[] = HABIT_GOAL_TIME_UNITS.map(item => ({
-    label: toCapitalCase(item),
+    label: convertToCapitalCase(item),
     value: item,
 }))
 
@@ -222,7 +222,6 @@ const ModalHabitItem = forwardRef((_props, ref) => {
     });
     const [submitLoading, setSubmitLoading] = useState(false);
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        console.log({values})
         try {
             setSubmitLoading(true);
             if (itemId) {

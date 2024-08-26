@@ -5,7 +5,7 @@ export const convertToKebabCase = (str: string) => {
         .toLowerCase();
 };
 
-export const toCapitalCase = (str: string) => {
+export const convertToCapitalCase = (str: string) => {
     return str
         .split(' ')
         .map(word =>

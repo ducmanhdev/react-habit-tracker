@@ -1,7 +1,7 @@
 import {Separator} from "@/components/ui/separator.tsx"
 import LeftBar, {FilteredData} from "@/pages/PageHabits/LeftBar.tsx";
 import {useParams} from "react-router-dom";
-import {useMemo, useRef, useState} from "react";
+import {useRef, useState} from "react";
 import RightBar from "@/pages/PageHabits/RightBar.tsx";
 import HabitBoard from "@/pages/PageHabits/HabitBoard.tsx";
 import CardHabitsEmpty from "./CardHabitsEmpty.tsx";
@@ -12,43 +12,6 @@ import {Doc, Id} from "../../../convex/_generated/dataModel";
 import {ModalAddHabitItemRef} from "@/components/ModalAddHabitItem.tsx";
 import HabitItem from "@/components/HabitItem.tsx";
 import HabitItemSkeleton from "@/components/HabitItemSkeleton.tsx";
-import {isToday, isTomorrow, isThisWeek, isThisMonth, isCompleted} from "@/utils/date.ts";
-
-type HabitClassification = {
-    today: Doc<"habitItems">[];
-    tomorrow: Doc<"habitItems">[];
-    week: Doc<"habitItems">[];
-    month: Doc<"habitItems">[];
-    completed: Doc<"habitItems">[];
-};
-
-const classifyHabits = (habits: Doc<"habitItems">[]): HabitClassification => {
-    return habits.reduce((acc: HabitClassification, habit) => {
-        const {startDate, goal: {completedCount, target}} = habit;
-
-        if (isToday(startDate)) {
-            acc.today.push(habit);
-        } else if (isTomorrow(startDate)) {
-            acc.tomorrow.push(habit);
-        } else if (isThisWeek(startDate)) {
-            acc.week.push(habit);
-        } else if (isThisMonth(startDate)) {
-            acc.month.push(habit);
-        }
-
-        if (isCompleted(completedCount, target)) {
-            acc.completed.push(habit);
-        }
-
-        return acc;
-    }, {
-        today: [],
-        tomorrow: [],
-        week: [],
-        month: [],
-        completed: []
-    });
-};
 
 const Index = () => {
     const {habitGroupId} = useParams();
@@ -63,8 +26,6 @@ const Index = () => {
     });
 
     const modalAddHabitIemRef = useRef<ModalAddHabitItemRef>(null);
-    const classifiedHabits = useMemo(() => classifyHabits(habitItems || []), [habitItems]);
-
     return (
         <>
             <div className="grid grid-cols-2 h-full">

@@ -159,7 +159,7 @@ const INITIAL_VALUE_MODAL_HABIT_ITEM: FormData = {
     schedule: {
         type: "daily",
         daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-        daysOfMonth: [1],
+        daysOfMonth: [0],
         interval: 2,
     },
     goal: {
@@ -443,13 +443,13 @@ const ModalHabitItem = forwardRef((_props, ref) => {
                                             <FormControl>
                                                 <DropdownSelect
                                                     multiple
-                                                    options={Array.from({length: 30}, (_, index) => ({
+                                                    options={Array.from({length: 31}, (_, index) => ({
                                                         label: (index + 1).toString(),
                                                         value: index
                                                     }))}
                                                     value={field.value || []}
                                                     onChange={value => form.setValue("schedule.daysOfMonth", value as number[])}
-                                                    labelFormat={(selectedOptions) => `Every month in ${selectedOptions.map(item => item.value).join(", ")}`}
+                                                    labelFormat={(selectedOptions) => `Every month in ${selectedOptions.map(item => item.label).join(", ")}`}
                                                 />
                                             </FormControl>
                                             <FormMessage/>

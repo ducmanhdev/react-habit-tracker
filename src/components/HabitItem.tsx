@@ -1,4 +1,4 @@
-import {cloneElement, useEffect, useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {ChartNoAxesColumn, Check, EllipsisVertical, Keyboard, Pencil, Plus, Timer, Trash, Undo, X} from "lucide-react"
 import {Button} from "@/components/ui/button.tsx";
 import {
@@ -226,12 +226,11 @@ const HabitItem = ({
                                 key={index}
                                 onClick={e => {
                                     e.stopPropagation();
-                                    item.action()
+                                    item.action();
                                 }}
-                                className="flex items-center gap-2 cursor-pointer"
+                                className="flex items-center gap-2 cursor-pointer [&_.lucide]:w-4 [&_.lucide]:h-4"
                             >
-                                {/*TODO Optimize cloneElement*/}
-                                {cloneElement(item.icon, {className: "w-4 h-4"})}
+                                {item.icon}
                                 {item.label}
                             </DropdownMenuItem>
                         ))}

@@ -8,7 +8,10 @@ import {HABIT_GOAL_TIME_UNITS, HABIT_GOAL_UNITS, HABIT_SCHEDULE_TYPES} from "../
 export const getHabitGroups = query({
     args: {},
     handler: async (ctx) => {
-        return await ctx.db.query("habitGroups").collect()
+        const userId = await getUserId(ctx);
+        return await ctx.db.query("habitGroups")
+            .filter((q) => q.eq(q.field("userId"), userId))
+            .collect()
     },
 });
 
@@ -82,9 +85,11 @@ export const getHabitItems = query({
     },
     handler: async (ctx, {search, date, order, groupId}) => {
         const currentDate = date && dayjs(date).isValid() ? dayjs(date) : null;
+        const userId = await getUserId(ctx);
         return filter(
             ctx.db.query("habitItems"),
             (habit) => {
+                const matchesUserId = habit.userId === userId;
                 const matchesGroup = groupId ? habit.groupId === groupId : true;
                 const matchesSearch = search ? habit.name.toLowerCase().includes(search.toLowerCase()) : true;
 
@@ -104,7 +109,7 @@ export const getHabitItems = query({
 
                 const matchesDate = !currentDate || (shouldDoToday && (!lastCompleted || !dayjs(lastCompleted).isSame(currentDate, 'date')));
 
-                return matchesGroup && matchesSearch && matchesDate;
+                return matchesUserId && matchesGroup && matchesSearch && matchesDate;
             }
         )
             .order(order === "a-z" ? "desc" : "asc")

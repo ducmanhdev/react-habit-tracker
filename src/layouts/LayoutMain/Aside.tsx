@@ -1,4 +1,4 @@
-import {useRef, cloneElement, ReactElement} from "react";
+import {useRef} from "react";
 import {NavLink, Link, NavLinkProps, useLocation} from "react-router-dom";
 import {
     DropdownMenu,
@@ -11,27 +11,49 @@ import {Separator} from "@/components/ui/separator.tsx"
 import {useAuthActions} from "@convex-dev/auth/react";
 import {useQuery} from "convex/react";
 import {api} from "../../../convex/_generated/api";
-import {icons, Pencil} from "lucide-react";
 import {Avatar, AvatarImage, AvatarFallback} from "@/components/ui/avatar.tsx";
 import ModalAddHabitGroup, {ModalAddHabitGroupRef} from "@/components/ModalAddHabitGroup.tsx";
+import Icon, {IconProps} from "@/components/Icon.tsx"
+import {convertToKebabCase} from "@/utils/text.ts";
 
 type AsideMenuItemProps = {
     id?: number | string;
     route?: NavLinkProps['to'];
     onClick?: () => void;
-    icon: keyof typeof icons;
+    icon: string;
     label: string;
-    suffixIcon?: ReactElement;
+    suffixIcon?: string;
+    suffixIconAction?: () => void;
     isActive?: boolean;
 }
 
-const AsideMenuItem = ({id, icon, label, route, onClick, suffixIcon, isActive = false}: AsideMenuItemProps) => {
-    const Icon = icons[icon];
+const AsideMenuItem = ({
+                           id,
+                           icon,
+                           label,
+                           route,
+                           onClick,
+                           suffixIcon,
+                           suffixIconAction,
+                           isActive = false
+                       }: AsideMenuItemProps) => {
     const content = (
         <>
-            <Icon className="flex-shrink-0"/>
+            <Icon name={convertToKebabCase(icon) as IconProps["name"]} className="flex-shrink-0"/>
             <span className="flex-grow overflow-hidden text-ellipsis">{label}</span>
-            {suffixIcon && cloneElement(suffixIcon, {className: "flex-shrink-0"})}
+            {
+                suffixIcon && (
+                    <Icon
+                        name={convertToKebabCase(suffixIcon) as IconProps["name"]}
+                        className="flex-shrink-0"
+                        onClick={e => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            suffixIconAction && suffixIconAction()
+                        }}
+                    />
+                )
+            }
         </>
     );
 
@@ -69,12 +91,12 @@ const Aside = () => {
             label: group.name,
             icon: group.icon as AsideMenuItemProps["icon"],
             route: `/habits/${group._id}`,
-            suffixIcon: <Pencil
-                onClick={() => modalAddHabitGroupRef?.current?.open({
-                    id: group._id,
-                    icon: group.icon as AsideMenuItemProps["icon"],
-                    name: group.name
-                })}/>,
+            suffixIcon: "Pencil",
+            suffixIconAction: () => modalAddHabitGroupRef?.current?.open({
+                id: group._id,
+                icon: group.icon,
+                name: group.name
+            }),
         })),
         {
             id: '',
@@ -110,7 +132,7 @@ const Aside = () => {
                 <div className="p-4 flex-grow text-muted-foreground space-y-4">
                     {
                         navGroups.map(group => (
-                            <nav key={group.name}>
+                            <nav key={group.name} className="space-y-1">
                                 {
                                     group.name && <p className="px-4 py-2 text-sm font-semibold">{group.name}</p>
                                 }
@@ -123,6 +145,7 @@ const Aside = () => {
                                             icon={child.icon}
                                             label={child.label}
                                             suffixIcon={child.suffixIcon}
+                                            suffixIconAction={child.suffixIconAction}
                                             onClick={child.onClick}
                                             isActive={location.pathname === child.route}
                                         />

@@ -192,12 +192,16 @@ export const updateHabitItem = mutation({
             name: args.name || habitItem.icon,
             icon: args.icon || habitItem.icon,
             schedule: {
-                ...habitItem.schedule,
-                ...args.schedule,
+                type: args.schedule?.type || habitItem.schedule.type,
+                daysOfWeek: args.schedule?.daysOfWeek || habitItem.schedule.daysOfWeek,
+                daysOfMonth: args.schedule?.daysOfMonth || habitItem.schedule.daysOfMonth,
+                interval: args.schedule?.interval || habitItem.schedule.interval,
             },
             goal: {
-                ...habitItem.goal,
-                ...args.goal,
+                target: args.goal?.target || habitItem.goal.target,
+                unit: args.goal?.unit || habitItem.goal.unit,
+                timeUnit: args.goal?.timeUnit || habitItem.goal.timeUnit,
+                completedCount: habitItem.goal.completedCount
             },
             startDate: args.startDate || habitItem.startDate
         });

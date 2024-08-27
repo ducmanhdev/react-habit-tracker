@@ -1,13 +1,5 @@
-import {useEffect, useState, cloneElement, ReactElement, useRef} from "react";
-import {
-    Plus,
-    EllipsisVertical,
-    Undo,
-    Pencil,
-    Check,
-    ChartNoAxesColumn,
-    Trash, Keyboard, X, Timer
-} from "lucide-react"
+import {cloneElement, useEffect, useRef, useState} from "react";
+import {ChartNoAxesColumn, Check, EllipsisVertical, Keyboard, Pencil, Plus, Timer, Trash, Undo, X} from "lucide-react"
 import {Button} from "@/components/ui/button.tsx";
 import {
     DropdownMenu,
@@ -31,12 +23,6 @@ type HabitItemProps = {
     onClick: () => void;
     onEdit: () => void;
 }
-
-type MenuItem = {
-    icon: ReactElement;
-    label: string;
-    action: () => void;
-};
 
 type LogInputProps = {
     unit: string;
@@ -87,12 +73,12 @@ const HabitItem = ({
 
     const [completed, setCompleted] = useState(false);
     useEffect(() => {
-        if (habit && habit.lastCompleted && dayjs(habit.lastCompleted).isValid()) {
+        if (habit?.lastCompleted && dayjs(habit.lastCompleted).isValid()) {
             setCompleted(isToday(habit.lastCompleted));
         } else {
             setCompleted(false);
         }
-    }, [habit]);
+    }, [habit.lastCompleted]);
 
     const [deleteLoading, setDeleteLoading] = useState(false);
     const handleDelete = async () => {
@@ -130,26 +116,16 @@ const HabitItem = ({
         }
     }
 
-    const menuItems: MenuItem[] = [
-        {icon: <Pencil/>, label: 'Edit', action: () => onEdit()},
+    const baseItems = [
+        {icon: <Pencil/>, label: 'Edit', action: onEdit},
         {icon: <Keyboard/>, label: 'Log Progress', action: () => setLogging(true)},
-        {icon: <ChartNoAxesColumn/>, label: 'View Progress', action: () => onClick()},
-        {icon: <Trash/>, label: 'Delete', action: () => handleDelete()},
+        {icon: <ChartNoAxesColumn/>, label: 'View Progress', action: onClick},
+        {icon: <Trash/>, label: 'Delete', action: handleDelete},
     ];
 
-    if (completed) {
-        menuItems.unshift({
-            icon: <Undo/>,
-            label: 'Undo complete',
-            action: () => handleUndoComplete(),
-        });
-    } else {
-        menuItems.unshift({
-            icon: <Check/>,
-            label: 'Check-in',
-            action: () => handleUpdateCount(1)
-        });
-    }
+    const menuItems = completed
+        ? [{icon: <Undo/>, label: 'Undo complete', action: handleUndoComplete}, ...baseItems]
+        : [{icon: <Check/>, label: 'Check-in', action: () => handleUpdateCount(1)}, ...baseItems];
 
     const [logging, setLogging] = useState(false);
     const handleLogging = async (value: number) => {
@@ -160,6 +136,45 @@ const HabitItem = ({
             toast.error('Update failed');
         }
     }
+
+    const actionButton = (() => {
+        switch (habit.goal.unit) {
+            case "times": {
+                return <Button
+                    size="sm"
+                    variant="secondary"
+                    disabled={updateCountLoading}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleUpdateCount(1);
+                    }}
+                >
+                    <Plus/> 1
+                </Button>
+            }
+            case "minutes":
+            case "hours":
+                return <Button
+                    size="sm"
+                    variant="secondary"
+                    disabled
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <Timer/> Timer
+                </Button>
+            default:
+                return <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setLogging(true);
+                    }}
+                >
+                    <Keyboard/> Log
+                </Button>
+        }
+    })();
 
     return (
         <div
@@ -196,31 +211,7 @@ const HabitItem = ({
                                 onCancel={() => setLogging(false)}
                             />
                             : (
-                                habit.goal.unit === "minutes" ? (
-                                    <Button
-                                        size="sm"
-                                        variant="secondary"
-                                        disabled
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                        }}
-                                    >
-                                        <Timer/> Timer
-                                    </Button>
-                                ) : (
-                                    <Button
-                                        size="sm"
-                                        variant="secondary"
-                                        disabled={updateCountLoading}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleUpdateCount(1)
-                                        }}
-                                    >
-                                        <Plus/>
-                                        1
-                                    </Button>
-                                )
+                                actionButton
                             )
                     )}
                 <DropdownMenu>

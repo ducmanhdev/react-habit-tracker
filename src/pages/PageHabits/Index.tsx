@@ -66,7 +66,10 @@ const Index = () => {
                 {
                     currentHabit?._id && (
                         <section>
-                            <RightBar currentHabit={currentHabit}/>
+                            <RightBar
+                                currentHabit={currentHabit}
+                                onEdit={() => modalAddHabitIemRef?.current?.open(currentHabit)}
+                            />
                             <Separator/>
                             <HabitBoard currentHabit={currentHabit}/>
                         </section>

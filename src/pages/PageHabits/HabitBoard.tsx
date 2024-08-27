@@ -1,87 +1,48 @@
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card.tsx";
-import {ChartConfig, ChartContainer} from "@/components/ui/chart.tsx";
-import {Bar, BarChart} from "recharts";
+import {Card, CardDescription, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {Doc} from "../../../convex/_generated/dataModel";
-
-const chartConfig = {
-    desktop: {
-        label: "Desktop",
-        color: "#2563eb",
-    },
-    mobile: {
-        label: "Mobile",
-        color: "#60a5fa",
-    },
-} satisfies ChartConfig
+import {Flame} from "lucide-react";
 
 type HabitBoardProps = {
     currentHabit: Doc<"habitItems">
 }
 
 const HabitBoard = ({currentHabit}: HabitBoardProps) => {
-    const chartData = [
-        {month: "January", desktop: 186, mobile: 80},
-        {month: "February", desktop: 305, mobile: 200},
-        {month: "March", desktop: 237, mobile: 120},
-        {month: "April", desktop: 73, mobile: 190},
-        {month: "May", desktop: 209, mobile: 130},
-        {month: "June", desktop: 214, mobile: 140},
-    ]
     return (
         <div className="p-4 grid grid-cols-2 content-start gap-4">
-            <Card>
+            <Card className="col-span-full">
                 <CardHeader>
-                    <CardTitle>Create project</CardTitle>
-                    <CardDescription>Deploy your new project in one-click.</CardDescription>
+                    <CardDescription className="flex items-center gap-2 mb-2">
+                        <Flame className="text-red-600"/>
+                        Current streak
+                    </CardDescription>
+                    <CardTitle>
+                        {currentHabit.streak} days
+                    </CardTitle>
                 </CardHeader>
-                <CardContent>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Autem corporis ex pariatur porro
-                    quas repellat. Alias aliquam animi aperiam consectetur corporis culpa doloribus enim eos
-                    explicabo ipsam molestiae nam necessitatibus odio officia possimus provident quos,
-                    reiciendis vero? At beatae blanditiis consequuntur deserunt dignissimos, ex fuga, fugit
-                    laudantium optio quisquam, velit?
-                </CardContent>
             </Card>
             <Card>
                 <CardHeader>
-                    <CardTitle>Create project</CardTitle>
-                    <CardDescription>Deploy your new project in one-click.</CardDescription>
+                    <CardDescription>Completed</CardDescription>
+                    <CardTitle>0 days</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-                        <BarChart accessibilityLayer data={chartData}>
-                            <Bar dataKey="desktop" fill="var(--color-desktop)" radius={4}/>
-                            <Bar dataKey="mobile" fill="var(--color-mobile)" radius={4}/>
-                        </BarChart>
-                    </ChartContainer>
-                </CardContent>
             </Card>
             <Card>
                 <CardHeader>
-                    <CardTitle>Create project</CardTitle>
-                    <CardDescription>Deploy your new project in one-click.</CardDescription>
+                    <CardDescription>Failed</CardDescription>
+                    <CardTitle>0 days</CardTitle>
                 </CardHeader>
-                <CardContent>
-
-                </CardContent>
             </Card>
             <Card>
                 <CardHeader>
-                    <CardTitle>Create project</CardTitle>
-                    <CardDescription>Deploy your new project in one-click.</CardDescription>
+                    <CardDescription>Skipped</CardDescription>
+                    <CardTitle>0 days</CardTitle>
                 </CardHeader>
-                <CardContent>
-
-                </CardContent>
             </Card>
             <Card>
                 <CardHeader>
-                    <CardTitle>Create project</CardTitle>
-                    <CardDescription>Deploy your new project in one-click.</CardDescription>
+                    <CardDescription>Total</CardDescription>
+                    <CardTitle>0 {currentHabit.goal.unit}</CardTitle>
                 </CardHeader>
-                <CardContent>
-
-                </CardContent>
             </Card>
         </div>
     )

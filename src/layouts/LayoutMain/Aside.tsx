@@ -1,5 +1,5 @@
 import {useRef, cloneElement, ReactElement} from "react";
-import {NavLink, Link, NavLinkProps} from "react-router-dom";
+import {NavLink, Link, NavLinkProps, useLocation} from "react-router-dom";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -22,9 +22,10 @@ type AsideMenuItemProps = {
     icon: keyof typeof icons;
     label: string;
     suffixIcon?: ReactElement;
+    isActive?: boolean;
 }
 
-const AsideMenuItem = ({id, icon, label, route, onClick, suffixIcon}: AsideMenuItemProps) => {
+const AsideMenuItem = ({id, icon, label, route, onClick, suffixIcon, isActive = false}: AsideMenuItemProps) => {
     const Icon = icons[icon];
     const content = (
         <>
@@ -38,28 +39,21 @@ const AsideMenuItem = ({id, icon, label, route, onClick, suffixIcon}: AsideMenuI
         <Button
             key={id}
             asChild
-            variant="ghost"
+            variant={isActive ? "default" : "ghost"}
             className="w-full justify-start inline-flex cursor-pointer text-ellipsis"
             onClick={onClick}
         >
             {route ? (
-                <NavLink
-                    to={route}
-                    end
-                    className={({isActive}) => isActive ? "text-white" : ""}
-                >
-                    {content}
-                </NavLink>
+                <NavLink to={route}>{content}</NavLink>
             ) : (
-                <span>
-                    {content}
-                </span>
+                <span>{content}</span>
             )}
         </Button>
     );
 };
 
 const Aside = () => {
+    const location = useLocation();
     const {signOut} = useAuthActions();
     const currentUser = useQuery(api.users.currentUser);
     const habitGroups = useQuery(api.habits.getHabitGroups);
@@ -109,7 +103,6 @@ const Aside = () => {
             children: settings
         }
     ]
-
     return (
         <>
             <ModalAddHabitGroup ref={modalAddHabitGroupRef}/>
@@ -131,6 +124,7 @@ const Aside = () => {
                                             label={child.label}
                                             suffixIcon={child.suffixIcon}
                                             onClick={child.onClick}
+                                            isActive={location.pathname === child.route}
                                         />
                                     ))
                                 }

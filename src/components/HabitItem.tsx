@@ -83,13 +83,13 @@ const HabitItem = ({
     const [deleteLoading, setDeleteLoading] = useState(false);
     const handleDelete = async () => {
         try {
-            setDeleteLoading(true)
+            setDeleteLoading(true);
             await del({id: habit._id});
             toast.success('Deleted successfully');
         } catch (error) {
             toast.error('Delete failed');
         } finally {
-            setDeleteLoading(true)
+            setDeleteLoading(false);
         }
     };
 

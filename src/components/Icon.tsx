@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useMemo } from 'react';
 import { LucideProps } from 'lucide-react';
 import dynamicIconImports from 'lucide-react/dynamicIconImports';
 
@@ -9,12 +9,8 @@ export type IconProps = Omit<LucideProps, 'ref'> & {
 }
 
 const Icon = ({ name, ...props }: IconProps) => {
-    if (!dynamicIconImports[name]) {
-        name = 'message-circle-warning'
-    }
-
-    const LucideIcon = lazy(dynamicIconImports[name]);
-
+    const memoizedIconName = useMemo(() => dynamicIconImports[name] ? name : 'message-circle-warning', [name]);
+    const LucideIcon = useMemo(() => lazy(dynamicIconImports[memoizedIconName]), [memoizedIconName]);
     return (
         <Suspense fallback={fallback}>
             <LucideIcon {...props} />
@@ -22,4 +18,4 @@ const Icon = ({ name, ...props }: IconProps) => {
     );
 }
 
-export default Icon
+export default Icon;

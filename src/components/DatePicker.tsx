@@ -46,7 +46,10 @@ const DatePicker = ({value, onChange, buttonClasses}: DatePickerProps) => {
                     {value && (
                         <CircleX
                             className="ml-auto"
-                            onClick={() => handleOnChange(undefined)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleOnChange(undefined);
+                            }}
                         />
                     )}
                 </Button>

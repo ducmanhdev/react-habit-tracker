@@ -166,6 +166,7 @@ export const addHabitItem = mutation({
 export const updateHabitItem = mutation({
     args: {
         id: v.id("habitItems"),
+        groupId: v.optional(v.id("habitGroups")),
         name: v.optional(v.string()),
         icon: v.optional(v.string()),
         schedule: v.optional(v.object({
@@ -194,6 +195,7 @@ export const updateHabitItem = mutation({
         }
 
         const id = await ctx.db.patch(habitItem._id, {
+            groupId: args.groupId || habitItem.groupId,
             name: args.name || habitItem.icon,
             icon: args.icon || habitItem.icon,
             schedule: {

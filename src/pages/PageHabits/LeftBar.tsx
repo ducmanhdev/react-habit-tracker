@@ -60,7 +60,7 @@ const LeftBar = ({onFilter, onCreateHabit}: PageHabitsLeftBarProps) => {
                             ref={inputRef}
                             onChange={(e) => setSearch(e.target.value)}
                             onBlur={handleSearchBarBlur}
-                            className="w-[190px]"
+                            className="w-[210px]"
                         /> :
                         <Button
                             variant="outline"
@@ -77,7 +77,7 @@ const LeftBar = ({onFilter, onCreateHabit}: PageHabitsLeftBarProps) => {
                         >
                             <Calendar/>
                         </Button> :
-                        <DatePicker value={date} onChange={setDate} buttonClasses="w-[190px]"/>
+                        <DatePicker value={date} onChange={setDate} buttonClasses="w-[210px]"/>
                 }
                 <Select value={order} onValueChange={setOrder}>
                     <SelectTrigger className="w-[180px]">

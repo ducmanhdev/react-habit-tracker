@@ -1,6 +1,6 @@
 import {useState} from "react"
 import {addDays, format} from "date-fns"
-import {Calendar as CalendarIcon} from "lucide-react"
+import {Calendar as CalendarIcon, CircleX} from "lucide-react"
 
 import {cn} from "@/lib/utils"
 import {Button} from "@/components/ui/button"
@@ -41,8 +41,14 @@ const DatePicker = ({value, onChange, buttonClasses}: DatePickerProps) => {
                         buttonClasses
                     )}
                 >
-                    <CalendarIcon className="mr-2 h-4 w-4"/>
+                    <CalendarIcon />
                     {value ? format(value, "PPP") : <span>Pick a date</span>}
+                    {value && (
+                        <CircleX
+                            className="ml-auto"
+                            onClick={() => handleOnChange(undefined)}
+                        />
+                    )}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="flex w-auto flex-col space-y-2 p-2">

@@ -1,11 +1,6 @@
 import {forwardRef, useImperativeHandle, useState} from "react";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog.tsx";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form.tsx";
-import {
-    DropdownMenu, DropdownMenuCheckboxItem,
-    DropdownMenuContent,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {Input} from "@/components/ui/input.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {useForm, useWatch} from "react-hook-form";
@@ -16,75 +11,59 @@ import {useMutation} from "convex/react";
 import {api} from "../../convex/_generated/api";
 import {toast} from "sonner";
 import IconPicker, {IconName} from "@/components/IconPicker.tsx";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select.tsx";
 import DatePicker from "@/components/DatePicker.tsx";
 import {HABIT_SCHEDULE_TYPES, HABIT_GOAL_UNITS, HABIT_GOAL_TIME_UNITS} from "@/constants/habits.ts";
 import dayjs from "dayjs";
 import {convertToCapitalCase} from "@/utils/text.ts";
 import {DAYS_OF_WEEKS} from "@/constants/dates.ts";
-import {ScrollArea} from "@/components/ui/scroll-area.tsx";
+import Combobox from "@/components/Combobox.tsx";
 
-type Option<T = string> = { label: string; value: T };
-
-type DropdownSelectProps<T> = {
-    options: Option<T>[],
-    value: T | T[],
-    multiple?: boolean,
-    onChange: (value: T | T[]) => void,
-    labelFormat?: (selectedOptions: Option<T>[]) => string,
+const INITIAL_VALUE_MODAL_HABIT_ITEM: FormData = {
+    name: '',
+    icon: undefined,
+    schedule: {
+        type: "daily",
+        daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+        daysOfMonth: [0],
+        interval: 2,
+    },
+    goal: {
+        target: 1,
+        unit: 'times',
+        timeUnit: 'day',
+    },
+    startDate: dayjs().valueOf()
 };
 
-const DropdownSelect = <T extends string | number>({
-                                                       options,
-                                                       value,
-                                                       multiple = false,
-                                                       onChange,
-                                                       labelFormat,
-                                                   }: DropdownSelectProps<T>) => {
-    const handleOnCheckedChange = (optionValue: T) => () => {
-        if (multiple) {
-            const prevValue = (value as T[]) || [];
-            const finalValue = prevValue.includes(optionValue)
-                ? prevValue.filter((item) => item !== optionValue)
-                : [...prevValue, optionValue];
-            onChange(finalValue);
-        } else {
-            onChange(optionValue);
-        }
-    };
+const SCHEDULE_TYPE_OPTIONS = HABIT_SCHEDULE_TYPES.map(item => ({
+    label: convertToCapitalCase(item),
+    value: item,
+}));
 
-    const selectedLabels = multiple
-        ? options.filter((item) => (value as T[]).includes(item.value))
-        : options.filter((item) => item.value === value);
+const GOAL_UNIT_OPTIONS = HABIT_GOAL_UNITS.map(item => ({
+    label: convertToCapitalCase(item),
+    value: item,
+}));
 
-    const displayLabel = labelFormat
-        ? labelFormat(selectedLabels)
-        : selectedLabels.map((item) => item.label).join(", ") || "Select items";
+const GOAL_UNIT_TIME_OPTIONS = HABIT_GOAL_TIME_UNITS.map(item => ({
+    label: convertToCapitalCase(item),
+    value: item,
+}));
 
-    return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full justify-start">
-                    {displayLabel}
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-                <ScrollArea className="h-72">
-                    {options.map(({label, value: optionValue}) => (
-                        <DropdownMenuCheckboxItem
-                            key={optionValue}
-                            onSelect={(e) => multiple && e.preventDefault()}
-                            checked={multiple ? (value as T[]).includes(optionValue) : value === optionValue}
-                            onCheckedChange={handleOnCheckedChange(optionValue)}
-                        >
-                            {label}
-                        </DropdownMenuCheckboxItem>
-                    ))}
-                </ScrollArea>
-            </DropdownMenuContent>
-        </DropdownMenu>
-    );
-};
+const DAYS_OF_MONTH_OPTIONS = Array.from({length: 31}, (_, index) => ({
+    label: (index + 1).toString(),
+    value: index
+}));
+
+const DAYS_OF_WEEK_OPTIONS = DAYS_OF_WEEKS.map((item, index) => ({
+    label: item,
+    value: index
+}));
+
+const INTERVAL_OPTIONS = Array.from({length: 6}, (_, index) => index + 2).map(item => ({
+    label: item.toString(),
+    value: item
+}));
 
 const scheduleSchema = z.object({
     type: z.enum(HABIT_SCHEDULE_TYPES),
@@ -152,42 +131,6 @@ const formSchema = z.object({
 });
 
 type FormData = z.infer<typeof formSchema> & { id?: Id<"habitItems"> };
-
-const INITIAL_VALUE_MODAL_HABIT_ITEM: FormData = {
-    name: '',
-    icon: undefined,
-    schedule: {
-        type: "daily",
-        daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-        daysOfMonth: [0],
-        interval: 2,
-    },
-    goal: {
-        target: 1,
-        unit: 'times',
-        timeUnit: 'day',
-    },
-    startDate: dayjs().valueOf()
-};
-
-type HabitScheduleTypes = (typeof HABIT_SCHEDULE_TYPES)[number];
-type HabitGoalUnits = (typeof HABIT_GOAL_UNITS)[number];
-type HabitTimeUnits = (typeof HABIT_GOAL_TIME_UNITS)[number];
-
-const SCHEDULE_TYPE_OPTIONS: Option<HabitScheduleTypes>[] = HABIT_SCHEDULE_TYPES.map(item => ({
-    label: convertToCapitalCase(item),
-    value: item,
-}));
-
-const GOAL_UNIT_OPTIONS: Option<HabitGoalUnits>[] = HABIT_GOAL_UNITS.map(item => ({
-    label: convertToCapitalCase(item),
-    value: item,
-}))
-
-const GOAL_UNIT_TIME_OPTIONS: Option<HabitTimeUnits>[] = HABIT_GOAL_TIME_UNITS.map(item => ({
-    label: convertToCapitalCase(item),
-    value: item,
-}))
 
 export type ModalAddHabitItemRef = {
     open: (initialValue?: FormData) => void
@@ -330,21 +273,12 @@ const ModalHabitItem = forwardRef((_props, ref) => {
                                     <FormItem>
                                         <FormLabel>Unit</FormLabel>
                                         <FormControl>
-                                            <Select
+                                            <Combobox
+                                                buttonClassName="w-full"
+                                                options={GOAL_UNIT_OPTIONS}
                                                 value={field.value}
-                                                onValueChange={field.onChange}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue/>
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {
-                                                        GOAL_UNIT_OPTIONS.map(({label, value}) => (
-                                                            <SelectItem key={label} value={value}>{label}</SelectItem>
-                                                        ))
-                                                    }
-                                                </SelectContent>
-                                            </Select>
+                                                onChange={field.onChange}
+                                            />
                                         </FormControl>
                                         <FormMessage/>
                                     </FormItem>
@@ -357,21 +291,12 @@ const ModalHabitItem = forwardRef((_props, ref) => {
                                     <FormItem>
                                         <FormLabel>Time Unit</FormLabel>
                                         <FormControl>
-                                            <Select
+                                            <Combobox
+                                                buttonClassName="w-full"
+                                                options={GOAL_UNIT_TIME_OPTIONS}
                                                 value={field.value}
-                                                onValueChange={field.onChange}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue/>
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {
-                                                        GOAL_UNIT_TIME_OPTIONS.map(({label, value}) => (
-                                                            <SelectItem key={label} value={value}>{label}</SelectItem>
-                                                        ))
-                                                    }
-                                                </SelectContent>
-                                            </Select>
+                                                onChange={field.onChange}
+                                            />
                                         </FormControl>
                                         <FormMessage/>
                                     </FormItem>
@@ -385,21 +310,12 @@ const ModalHabitItem = forwardRef((_props, ref) => {
                                 <FormItem>
                                     <FormLabel>Repeat</FormLabel>
                                     <FormControl>
-                                        <Select
+                                        <Combobox
+                                            buttonClassName="w-full"
+                                            options={SCHEDULE_TYPE_OPTIONS}
                                             value={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue/>
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {
-                                                    SCHEDULE_TYPE_OPTIONS.map(({label, value}) => (
-                                                        <SelectItem key={label} value={value}>{label}</SelectItem>
-                                                    ))
-                                                }
-                                            </SelectContent>
-                                        </Select>
+                                            onChange={field.onChange}
+                                        />
                                     </FormControl>
                                     <FormMessage/>
                                 </FormItem>
@@ -415,14 +331,12 @@ const ModalHabitItem = forwardRef((_props, ref) => {
                                         <FormItem>
                                             <FormLabel>Days of week</FormLabel>
                                             <FormControl>
-                                                <DropdownSelect
+                                                <Combobox
                                                     multiple
-                                                    options={DAYS_OF_WEEKS.map((item, index) => ({
-                                                        label: item,
-                                                        value: index
-                                                    }))}
+                                                    buttonClassName="w-full"
+                                                    options={DAYS_OF_WEEK_OPTIONS}
                                                     value={field.value || []}
-                                                    onChange={value => form.setValue("schedule.daysOfWeek", value as number[])}
+                                                    onChange={field.onChange}
                                                 />
                                             </FormControl>
                                             <FormMessage/>
@@ -441,15 +355,12 @@ const ModalHabitItem = forwardRef((_props, ref) => {
                                         <FormItem>
                                             <FormLabel>Days of month</FormLabel>
                                             <FormControl>
-                                                <DropdownSelect
+                                                <Combobox
+                                                    buttonClassName="w-full"
                                                     multiple
-                                                    options={Array.from({length: 31}, (_, index) => ({
-                                                        label: (index + 1).toString(),
-                                                        value: index
-                                                    }))}
+                                                    options={DAYS_OF_MONTH_OPTIONS}
                                                     value={field.value || []}
-                                                    onChange={value => form.setValue("schedule.daysOfMonth", value as number[])}
-                                                    labelFormat={(selectedOptions) => `Every month in ${selectedOptions.map(item => item.label).join(", ")}`}
+                                                    onChange={field.onChange}
                                                 />
                                             </FormControl>
                                             <FormMessage/>
@@ -468,14 +379,11 @@ const ModalHabitItem = forwardRef((_props, ref) => {
                                         <FormItem>
                                             <FormLabel>Interval</FormLabel>
                                             <FormControl>
-                                                <DropdownSelect
-                                                    options={Array.from({length: 6}, (_, index) => index + 2).map(item => ({
-                                                        label: item.toString(),
-                                                        value: item
-                                                    }))}
-                                                    value={field.value!}
-                                                    onChange={value => form.setValue("schedule.interval", value as number)}
-                                                    labelFormat={(selectedOptions) => `Repeat every ${selectedOptions[0]?.value} dates`}
+                                                <Combobox
+                                                    buttonClassName="w-full"
+                                                    options={INTERVAL_OPTIONS}
+                                                    value={field.value}
+                                                    onChange={field.onChange}
                                                 />
                                             </FormControl>
                                             <FormMessage/>

@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useState, useMemo} from "react";
 import {Check, ChevronsUpDown} from "lucide-react";
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
@@ -16,66 +16,72 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 
-type Option = { label: string; value: string };
+type Option<T> = { label: string; value: T };
 
-type ComboBoxPropsBase = {
-    options: Option[];
+type ComboBoxPropsBase<T> = {
+    options: Option<T>[];
     buttonClassName?: string;
+    placeholder?: string;
 };
 
-type ComboboxPropsSingle = ComboBoxPropsBase & {
-    value: string | undefined;
-    onChange: (value: string | undefined) => void;
+type ComboboxPropsSingle<T> = ComboBoxPropsBase<T> & {
+    value: T;
+    onChange: (value: T) => void;
     multiple?: false;
 };
 
-type ComboboxPropsMultiple = ComboBoxPropsBase & {
-    value: string[];
-    onChange: (value: string[]) => void;
+type ComboboxPropsMultiple<T> = ComboBoxPropsBase<T> & {
+    value: T[];
+    onChange: (value: T[]) => void;
     multiple: true;
 };
 
-type ComboboxProps = ComboboxPropsSingle | ComboboxPropsMultiple;
+type ComboboxProps<T> = ComboboxPropsSingle<T> | ComboboxPropsMultiple<T>;
 
-export const Combobox = ({
-                             options,
-                             value,
-                             onChange,
-                             buttonClassName,
-                             multiple = false,
-                         }: ComboboxProps) => {
+export const Combobox = <T,>({
+                                 options,
+                                 value,
+                                 onChange,
+                                 buttonClassName,
+                                 placeholder = "Select...",
+                                 multiple,
+                             }: ComboboxProps<T>) => {
     const [open, setOpen] = useState(false);
 
-    const handleSelect = (currentValue: string) => {
+    // Helper to handle selection logic
+    const handleSelect = (currentValue: T) => {
         if (multiple) {
-            const selectedValues = value as string[];
-            const newValue = selectedValues.includes(currentValue)
+            const selectedValues = value as T[];
+            const isSelected = selectedValues.includes(currentValue);
+            const newValue = isSelected
                 ? selectedValues.filter(item => item !== currentValue)
                 : [...selectedValues, currentValue];
-            (onChange as ComboboxPropsMultiple["onChange"])(newValue);
+            onChange(newValue);
         } else {
-            const selectedValue = value as string;
-            const newValue = currentValue === selectedValue ? undefined : currentValue;
-            (onChange as ComboboxPropsSingle["onChange"])(newValue);
+            onChange(currentValue);
             setOpen(false);
         }
     };
 
-    const renderButtonLabel = () => {
+    const buttonLabel = useMemo(() => {
         if (multiple) {
-            const selectedValues = value as string[];
-            if (selectedValues.length === 0) return "Select...";
-            return selectedValues.length === 1
-                ? options.find(option => option.value === selectedValues[0])?.label
-                : `${selectedValues.length} selected`;
+            const selectedValues = value as T[];
+            if (selectedValues.length === 0) return placeholder;
+            if (selectedValues.length === 1)
+                return options.find(option => option.value === selectedValues[0])?.label || placeholder;
+            return `${selectedValues.length} selected`;
         } else {
             const selectedOption = options.find(option => option.value === value);
-            return selectedOption ? selectedOption.label : "Select...";
+            return selectedOption ? selectedOption.label : placeholder;
         }
+    }, [value, options, multiple, placeholder]);
+
+    const isOptionSelected = (optionValue: T): boolean => {
+        return multiple ? (value as T[]).includes(optionValue) : value === optionValue;
     };
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={open} onOpenChange={setOpen} modal>
             <PopoverTrigger asChild>
                 <Button
                     variant="outline"
@@ -83,26 +89,26 @@ export const Combobox = ({
                     aria-expanded={open}
                     className={cn("justify-between", buttonClassName)}
                 >
-                    {renderButtonLabel()}
-                    <ChevronsUpDown className="opacity-50"/>
+                    {buttonLabel}
+                    <ChevronsUpDown className="opacity-50" />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="popover-fw p-0">
                 <Command>
-                    <CommandInput placeholder="Search..."/>
+                    <CommandInput placeholder="Search..." />
                     <CommandList>
                         <CommandEmpty>No options found.</CommandEmpty>
                         <CommandGroup>
-                            {options.map((option) => (
+                            {options.map(option => (
                                 <CommandItem
-                                    key={option.value}
-                                    value={option.value}
+                                    key={String(option.value)}
+                                    value={String(option.value)}
                                     onSelect={() => handleSelect(option.value)}
                                 >
                                     <Check
                                         className={cn(
                                             "mr-2 h-4 w-4",
-                                            value === option.value ? "opacity-100" : "opacity-0"
+                                            isOptionSelected(option.value) ? "opacity-100" : "opacity-0"
                                         )}
                                     />
                                     {option.label}
@@ -116,4 +122,4 @@ export const Combobox = ({
     );
 };
 
-export default Combobox
+export default Combobox;

@@ -1,6 +1,5 @@
 import {useState} from "react";
 import {Check, ChevronsUpDown} from "lucide-react";
-
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
 import {
@@ -17,24 +16,64 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 
-/* eslint-disable */
-type ComboboxProps = {
-    options: { label: string, value: any }[];
-    value: any;
-    onChange: (value: any) => void;
-    buttonClassName?: string;
-}
-/* eslint-enable */
+type Option = { label: string; value: string };
 
-export const Combobox = ({options, value, onChange, buttonClassName}: ComboboxProps) => {
-    console.log({options})
-    console.log({value})
-    console.log(options.find((option) => option.value === value)?.label)
+type ComboBoxPropsBase = {
+    options: Option[];
+    buttonClassName?: string;
+};
+
+type ComboboxPropsSingle = ComboBoxPropsBase & {
+    value: string | undefined;
+    onChange: (value: string | undefined) => void;
+    multiple?: false;
+};
+
+type ComboboxPropsMultiple = ComboBoxPropsBase & {
+    value: string[];
+    onChange: (value: string[]) => void;
+    multiple: true;
+};
+
+type ComboboxProps = ComboboxPropsSingle | ComboboxPropsMultiple;
+
+export const Combobox = ({
+                             options,
+                             value,
+                             onChange,
+                             buttonClassName,
+                             multiple = false,
+                         }: ComboboxProps) => {
     const [open, setOpen] = useState(false);
+
     const handleSelect = (currentValue: string) => {
-        onChange(currentValue === value ? undefined : currentValue);
-        setOpen(false);
-    }
+        if (multiple) {
+            const selectedValues = value as string[];
+            const newValue = selectedValues.includes(currentValue)
+                ? selectedValues.filter(item => item !== currentValue)
+                : [...selectedValues, currentValue];
+            (onChange as ComboboxPropsMultiple["onChange"])(newValue);
+        } else {
+            const selectedValue = value as string;
+            const newValue = currentValue === selectedValue ? undefined : currentValue;
+            (onChange as ComboboxPropsSingle["onChange"])(newValue);
+            setOpen(false);
+        }
+    };
+
+    const renderButtonLabel = () => {
+        if (multiple) {
+            const selectedValues = value as string[];
+            if (selectedValues.length === 0) return "Select...";
+            return selectedValues.length === 1
+                ? options.find(option => option.value === selectedValues[0])?.label
+                : `${selectedValues.length} selected`;
+        } else {
+            const selectedOption = options.find(option => option.value === value);
+            return selectedOption ? selectedOption.label : "Select...";
+        }
+    };
+
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -44,17 +83,15 @@ export const Combobox = ({options, value, onChange, buttonClassName}: ComboboxPr
                     aria-expanded={open}
                     className={cn("justify-between", buttonClassName)}
                 >
-                    {value
-                        ? options.find((option) => option.value === value)?.label
-                        : "Select..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
+                    {renderButtonLabel()}
+                    <ChevronsUpDown className="opacity-50"/>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="p-0">
+            <PopoverContent className="popover-fw p-0">
                 <Command>
-                    <CommandInput placeholder="Search framework..."/>
+                    <CommandInput placeholder="Search..."/>
                     <CommandList>
-                        <CommandEmpty>No framework found.</CommandEmpty>
+                        <CommandEmpty>No options found.</CommandEmpty>
                         <CommandGroup>
                             {options.map((option) => (
                                 <CommandItem
@@ -79,4 +116,4 @@ export const Combobox = ({options, value, onChange, buttonClassName}: ComboboxPr
     );
 };
 
-export default Combobox;
+export default Combobox

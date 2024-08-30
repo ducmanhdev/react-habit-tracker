@@ -61,13 +61,13 @@ const IconPicker = ({currentIcon, onIconSelect}: IconPickerProps) => {
 
     const SelectedIcon = icons[currentIcon];
     return (
-        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+        <Popover modal open={popoverOpen} onOpenChange={setPopoverOpen}>
             <PopoverTrigger asChild>
                 <Button variant="outline" className="w-full">
                     <SelectedIcon/>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 space-y-4">
+            <PopoverContent className="popover-fw min-w-72 space-y-4">
                 <Input
                     placeholder="Search icon name..."
                     onInput={(e) => setSearch((e.target as HTMLInputElement).value)}

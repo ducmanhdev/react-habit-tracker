@@ -1,4 +1,4 @@
-import {forwardRef, useImperativeHandle, useState} from "react";
+import {forwardRef, useImperativeHandle, useMemo, useState} from "react";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog.tsx";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form.tsx";
 import {Input} from "@/components/ui/input.tsx";
@@ -7,7 +7,7 @@ import {useForm, useWatch} from "react-hook-form";
 import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Id} from "../../convex/_generated/dataModel";
-import {useMutation} from "convex/react";
+import {useMutation, useQuery} from "convex/react";
 import {api} from "../../convex/_generated/api";
 import {toast} from "sonner";
 import IconPicker, {IconName} from "@/components/IconPicker.tsx";
@@ -17,23 +17,6 @@ import dayjs from "dayjs";
 import {convertToCapitalCase} from "@/utils/text.ts";
 import {DAYS_OF_WEEKS} from "@/constants/dates.ts";
 import Combobox from "@/components/Combobox.tsx";
-
-const INITIAL_VALUE_MODAL_HABIT_ITEM: FormData = {
-    name: '',
-    icon: undefined,
-    schedule: {
-        type: "daily",
-        daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-        daysOfMonth: [0],
-        interval: 2,
-    },
-    goal: {
-        target: 1,
-        unit: 'times',
-        timeUnit: 'day',
-    },
-    startDate: dayjs().valueOf()
-};
 
 const SCHEDULE_TYPE_OPTIONS = HABIT_SCHEDULE_TYPES.map(item => ({
     label: convertToCapitalCase(item),
@@ -73,109 +56,122 @@ const scheduleSchema = z.object({
 }).superRefine((data, ctx) => {
     const {type, daysOfWeek, daysOfMonth, interval} = data;
 
-    let isValid = true;
-
-    if (type === "daily") {
-        if (!daysOfWeek || !daysOfWeek.length) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                path: ["daysOfWeek"],
-                message: "Days of week is required for daily schedule.",
-            });
-            isValid = false;
-        }
+    if (type === "daily" && (!daysOfWeek || !daysOfWeek.length)) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["daysOfWeek"],
+            message: "Days of week is required for daily schedule.",
+        });
     }
 
-    if (type === "monthly") {
-        if (!daysOfMonth || !daysOfMonth.length) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                path: ["daysOfMonth"],
-                message: "Days of month is required for monthly schedule.",
-            });
-            isValid = false;
-        }
+    if (type === "monthly" && (!daysOfMonth || !daysOfMonth.length)) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["daysOfMonth"],
+            message: "Days of month is required for monthly schedule.",
+        });
     }
 
-    if (type === "custom") {
-        if (interval === undefined || interval <= 0) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                path: ["interval"],
-                message: "Interval is required and should be greater than 0 for custom schedule.",
-            });
-            isValid = false;
-        }
+    if (type === "custom" && (interval === undefined || interval <= 0)) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["interval"],
+            message: "Interval is required and should be greater than 0 for custom schedule.",
+        });
     }
-
-    return isValid;
 });
 
 const formSchema = z.object({
-    name: z.string()
-        .min(1, {message: "Please enter the name of the habit"}),
+    id: z.optional(z.string()),
+    groupId: z.optional(z.string()),
+    name: z.string().min(1, {message: "Please enter the name of the habit"}),
     icon: z.optional(z.string()),
     schedule: scheduleSchema,
     goal: z.object({
-        target: z.number()
-            .min(1, {message: "Target must be at least 1"}),
-        unit: z.enum(HABIT_GOAL_UNITS, {
-            invalid_type_error: "Invalid goal unit"
-        }),
-        timeUnit: z.enum(HABIT_GOAL_TIME_UNITS, {
-            invalid_type_error: "Invalid goal time unit"
-        }),
+        target: z.number().min(1, {message: "Target must be at least 1"}),
+        unit: z.enum(HABIT_GOAL_UNITS, {invalid_type_error: "Invalid goal unit"}),
+        timeUnit: z.enum(HABIT_GOAL_TIME_UNITS, {invalid_type_error: "Invalid goal time unit"}),
     }),
-    startDate: z.number()
-        .min(1, {message: "Start date must be a valid number"})
+    startDate: z.number().min(1, {message: "Start date must be a valid number"})
 });
 
-type FormData = z.infer<typeof formSchema> & { id?: Id<"habitItems"> };
+type FormData = z.infer<typeof formSchema>;
+
+const INITIAL_VALUE_MODAL_HABIT_ITEM: FormData = {
+    name: '',
+    icon: undefined,
+    schedule: {
+        type: "daily",
+        daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+        daysOfMonth: [0],
+        interval: 2,
+    },
+    goal: {
+        target: 1,
+        unit: 'times',
+        timeUnit: 'day',
+    },
+    startDate: dayjs().valueOf(),
+    groupId: undefined,
+};
+
+type ModalOpenInputUpdateProps = FormData & {
+    _id: Id<"habitItems">
+}
+
+type ModalOpenInputCreateProps = { groupId?: string }
+
+type ModalOpenInputProps = ModalOpenInputUpdateProps | ModalOpenInputCreateProps
 
 export type ModalAddHabitItemRef = {
-    open: (initialValue?: FormData) => void
+    open: (initialValue?: ModalOpenInputProps) => void
 }
 
 const ModalHabitItem = forwardRef((_props, ref) => {
     useImperativeHandle(ref, () => ({
-        open: (initialValue?: FormData) => {
-            if (initialValue) {
-                setItemId(initialValue?.id);
+        open: (initialValue?: ModalOpenInputProps) => {
+            if (initialValue && "_id" in initialValue) {
+                const {_id, ...rest} = initialValue;
                 form.reset({
-                    ...initialValue,
+                    ...rest,
+                    id: _id,
                 });
             } else {
-                setItemId(undefined);
                 form.reset({
-                    ...INITIAL_VALUE_MODAL_HABIT_ITEM
+                    ...INITIAL_VALUE_MODAL_HABIT_ITEM,
+                    groupId: initialValue?.groupId
                 });
             }
             setOpen(true);
         }
     }));
 
+    const habitGroups = useQuery(api.habits.getHabitGroups);
+
     const add = useMutation(api.habits.addHabitItem);
     const update = useMutation(api.habits.updateHabitItem);
     const del = useMutation(api.habits.deleteHabitItem);
 
     const [open, setOpen] = useState(false);
-    const [itemId, setItemId] = useState<FormData["id"]>();
-    const form = useForm<z.infer<typeof formSchema>>({
+    const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
     });
     const [submitLoading, setSubmitLoading] = useState(false);
-    const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const onSubmit = async (values: FormData) => {
         try {
             setSubmitLoading(true);
-            if (itemId) {
+            const {id, groupId, ...rest} = values;
+            if (id) {
                 await update({
-                    id: itemId,
-                    ...values,
+                    ...rest,
+                    id: id as Id<"habitItems">,
+                    groupId: groupId as Id<"habitGroups">,
                 });
                 toast.success("Updated successfully");
             } else {
                 await add({
-                    ...values,
+                    ...rest,
+                    groupId: groupId as Id<"habitGroups">,
                 });
                 toast.success("Created successfully");
             }
@@ -192,7 +188,7 @@ const ModalHabitItem = forwardRef((_props, ref) => {
         try {
             setDeleteLoading(true);
             await del({
-                id: itemId!,
+                id: form.getValues("id") as Id<"habitItems">,
             });
             toast.success('Deleted successfully');
             setOpen(false);
@@ -208,15 +204,41 @@ const ModalHabitItem = forwardRef((_props, ref) => {
         name: "schedule.type",
     });
 
+    const habitGroupOptions = useMemo(() =>
+            (habitGroups || []).map(group => ({
+                label: group.name,
+                value: group._id,
+            })),
+        [habitGroups]
+    );
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>{itemId ? "Update" : "Create"} Habit Item</DialogTitle>
+                    <DialogTitle>{form.getValues("id") ? "Update" : "Create"} Habit Item</DialogTitle>
                     <DialogDescription></DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="groupId"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>Group</FormLabel>
+                                    <FormControl>
+                                        <Combobox
+                                            buttonClassName="w-full"
+                                            options={habitGroupOptions}
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                        />
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
                         <div className="grid grid-cols-[80px_1fr] gap-4">
                             <FormField
                                 control={form.control}
@@ -414,9 +436,9 @@ const ModalHabitItem = forwardRef((_props, ref) => {
                             className="w-full"
                             disabled={submitLoading}
                         >
-                            {itemId ? "Update" : "Create"}
+                            {form.getValues("id") ? "Update" : "Create"}
                         </Button>
-                        {itemId && (
+                        {form.getValues("id") && (
                             <Button
                                 variant="destructive"
                                 className="w-full"

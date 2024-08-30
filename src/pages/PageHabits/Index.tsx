@@ -36,7 +36,9 @@ const Index = () => {
                 <section className="border-r">
                     <LeftBar
                         onFilter={setFilteredHabits}
-                        onCreateHabit={() => modalAddHabitIemRef?.current?.open()}
+                        onCreateHabit={() => modalAddHabitIemRef?.current?.open({
+                            groupId: habitGroupId,
+                        })}
                     />
                     <Separator/>
                     <div className="p-4 space-y-4">
@@ -47,7 +49,9 @@ const Index = () => {
                                 ))
                             ) : habitItems.length === 0 ? (
                                 <CardHabitsEmpty
-                                    onCreateHabit={() => modalAddHabitIemRef?.current?.open()}
+                                    onCreateHabit={() => modalAddHabitIemRef?.current?.open({
+                                        groupId: habitGroupId,
+                                    })}
                                 />
                             ) : (
                                 habitItems.map(habit => (

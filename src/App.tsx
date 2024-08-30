@@ -13,6 +13,7 @@ import PageLogin from "@/pages/PageLogin";
 import ProtectedRoute from "@/components/ProtectedRoute.tsx";
 import PublicRoute from "@/components/PublicRoute.tsx";
 import {Toaster} from "@/components/ui/sonner";
+import {ModalConfirmProvider} from "@/providers/modal-confirm-provider.tsx"
 
 const router = createBrowserRouter([
     {
@@ -58,7 +59,9 @@ const router = createBrowserRouter([
 export default function App() {
     return (
         <ThemeProvider>
-            <RouterProvider router={router}/>
+            <ModalConfirmProvider>
+                <RouterProvider router={router}/>
+            </ModalConfirmProvider>,
             <Toaster richColors/>
         </ThemeProvider>
     )

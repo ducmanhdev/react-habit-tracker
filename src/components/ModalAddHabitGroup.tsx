@@ -10,7 +10,8 @@ import {Id} from "../../convex/_generated/dataModel";
 import {useMutation} from "convex/react";
 import {api} from "../../convex/_generated/api";
 import {toast} from "sonner";
-import IconPicker, {IconName} from "@/components/IconPicker.tsx"
+import IconPicker, {IconName} from "@/components/IconPicker.tsx";
+import {useModalConfirm} from "@/providers/modal-confirm-provider.tsx";
 
 const formSchema = z.object({
     name: z.string().min(1, "Please enter name of habit group"),
@@ -46,6 +47,7 @@ const ModalAddHabitGroup = forwardRef((_props, ref) => {
         }
     }));
 
+    const modalConfirm = useModalConfirm();
     const add = useMutation(api.habits.addHabitGroup);
     const update = useMutation(api.habits.updateHabitGroup);
     const del = useMutation(api.habits.deleteHabitGroup);
@@ -82,19 +84,21 @@ const ModalAddHabitGroup = forwardRef((_props, ref) => {
     };
 
     const [deleteLoading, setDeleteLoading] = useState(false);
-    const handleDelete = async () => {
-        try {
-            setDeleteLoading(true)
-            await del({
-                id: groupId!,
-            })
-            toast.success('Delete successfully');
-            setOpen(false);
-        } catch (error) {
-            toast.success('Delete failed');
-        } finally {
-            setDeleteLoading(false)
-        }
+    const handleDelete = () => {
+        modalConfirm.confirm(async () => {
+            try {
+                setDeleteLoading(true)
+                await del({
+                    id: groupId!,
+                })
+                toast.success('Delete successfully');
+                setOpen(false);
+            } catch (error) {
+                toast.success('Delete failed');
+            } finally {
+                setDeleteLoading(false)
+            }
+        })
     }
 
     return (
@@ -143,6 +147,7 @@ const ModalAddHabitGroup = forwardRef((_props, ref) => {
                         {
                             groupId &&
                             <Button
+                                type="button"
                                 variant="destructive"
                                 className="w-full"
                                 disabled={deleteLoading}

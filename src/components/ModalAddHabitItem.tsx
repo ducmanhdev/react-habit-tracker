@@ -17,6 +17,7 @@ import dayjs from "dayjs";
 import {convertToCapitalCase} from "@/utils/text.ts";
 import {DAYS_OF_WEEKS} from "@/constants/dates.ts";
 import Combobox from "@/components/Combobox.tsx";
+import {useModalConfirm} from "@/providers/modal-confirm-provider.tsx";
 
 const SCHEDULE_TYPE_OPTIONS = HABIT_SCHEDULE_TYPES.map(item => ({
     label: convertToCapitalCase(item),
@@ -146,6 +147,7 @@ const ModalHabitItem = forwardRef((_props, ref) => {
         }
     }));
 
+    const modalConfirm = useModalConfirm();
     const habitGroups = useQuery(api.habits.getHabitGroups);
 
     const add = useMutation(api.habits.addHabitItem);
@@ -184,20 +186,23 @@ const ModalHabitItem = forwardRef((_props, ref) => {
     };
 
     const [deleteLoading, setDeleteLoading] = useState(false);
-    const handleDelete = async () => {
-        try {
-            setDeleteLoading(true);
-            await del({
-                id: form.getValues("id") as Id<"habitItems">,
-            });
-            toast.success('Deleted successfully');
-            setOpen(false);
-        } catch (error) {
-            toast.error('Delete failed');
-        } finally {
-            setDeleteLoading(false);
-        }
-    };
+    const handleDelete = () => {
+        modalConfirm.confirm(async () => {
+            try {
+                console.log(1)
+                setDeleteLoading(true);
+                await del({
+                    id: form.getValues("id") as Id<"habitItems">,
+                });
+                toast.success('Deleted successfully');
+                setOpen(false);
+            } catch (error) {
+                toast.error('Delete failed');
+            } finally {
+                setDeleteLoading(false);
+            }
+        })
+    }
 
     const scheduleType = useWatch({
         control: form.control,
@@ -440,6 +445,7 @@ const ModalHabitItem = forwardRef((_props, ref) => {
                         </Button>
                         {form.getValues("id") && (
                             <Button
+                                type="button"
                                 variant="destructive"
                                 className="w-full"
                                 disabled={deleteLoading}

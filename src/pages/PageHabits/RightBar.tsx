@@ -5,6 +5,7 @@ import {Doc} from "../../../convex/_generated/dataModel";
 import {useMutation} from "convex/react";
 import {api} from "../../../convex/_generated/api";
 import {toast} from "sonner";
+import {useModalConfirm} from "@/providers/modal-confirm-provider.tsx";
 
 type RightBarProps = {
     currentHabit: Doc<"habitItems">;
@@ -12,19 +13,22 @@ type RightBarProps = {
 }
 
 const RightBar = ({currentHabit, onEdit}: RightBarProps) => {
+    const modalConfirm = useModalConfirm();
     const del = useMutation(api.habits.deleteHabitItem);
     const [deleteLoading, setDeleteLoading] = useState(false);
-    const handleDelete = async () => {
-        try {
-            setDeleteLoading(true);
-            await del({id: currentHabit._id});
-            toast.success('Deleted successfully');
-        } catch (error) {
-            toast.error('Delete failed');
-        } finally {
-            setDeleteLoading(false);
-        }
-    };
+    const handleDelete = () => {
+        modalConfirm.confirm(async () => {
+            try {
+                setDeleteLoading(true);
+                await del({id: currentHabit._id});
+                toast.success('Deleted successfully');
+            } catch (error) {
+                toast.error('Delete failed');
+            } finally {
+                setDeleteLoading(false);
+            }
+        })
+    }
     return (
         <nav className="p-4 flex gap-2 justify-between items-center">
             <h2>{currentHabit.name}</h2>

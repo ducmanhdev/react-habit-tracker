@@ -16,6 +16,7 @@ import dayjs from "dayjs";
 import {Input} from "@/components/ui/input.tsx";
 import {convertToKebabCase} from "@/utils/text.ts";
 import {isToday} from "@/utils/date.ts";
+import {useModalConfirm} from "@/providers/modal-confirm-provider.tsx";
 
 type HabitItemProps = {
     habit: Doc<"habitItems">;
@@ -67,6 +68,8 @@ const HabitItem = ({
                        onClick,
                        onEdit
                    }: HabitItemProps) => {
+    const modalConfirm = useModalConfirm();
+
     const del = useMutation(api.habits.deleteHabitItem);
     const updateCompletedCount = useMutation(api.habits.updateCompletedCount);
     const resetCompletedCount = useMutation(api.habits.resetCompletedCount);
@@ -81,17 +84,19 @@ const HabitItem = ({
     }, [habit.lastCompleted]);
 
     const [deleteLoading, setDeleteLoading] = useState(false);
-    const handleDelete = async () => {
-        try {
-            setDeleteLoading(true);
-            await del({id: habit._id});
-            toast.success('Deleted successfully');
-        } catch (error) {
-            toast.error('Delete failed');
-        } finally {
-            setDeleteLoading(false);
-        }
-    };
+    const handleDelete = () => {
+        modalConfirm.confirm(async () => {
+            try {
+                setDeleteLoading(true);
+                await del({id: habit._id});
+                toast.success('Deleted successfully');
+            } catch (error) {
+                toast.error('Delete failed');
+            } finally {
+                setDeleteLoading(false);
+            }
+        })
+    }
 
     const [updateCountLoading, setUpdateCountLoading] = useState(false);
     const handleUpdateCount = async (increment: number) => {

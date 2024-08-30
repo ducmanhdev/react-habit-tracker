@@ -297,7 +297,8 @@ export const resetCompletedCount = mutation({
                 ...habitItem.goal,
                 completedCount: 0,
             },
-            lastCompleted: undefined
+            lastCompleted: undefined,
+            streak: habitItem.streak - 1,
         });
 
         return {id};

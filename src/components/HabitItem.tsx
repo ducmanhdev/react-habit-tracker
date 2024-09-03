@@ -165,15 +165,21 @@ const HabitItem = ({
 
     const baseItems = [
         {icon: <Pencil/>, label: 'Edit', action: onEdit},
-        {icon: <Keyboard/>, label: 'Log Progress', action: () => setLogging(true)},
         {icon: <ChartNoAxesColumn/>, label: 'View Progress', action: onClick},
         {icon: <Archive/>, label: 'Archive', action: handleArchive},
         {icon: <Trash/>, label: 'Delete', action: handleDelete},
     ];
 
     const menuItems = completed
-        ? [{icon: <Undo/>, label: 'Undo complete', action: handleUndoComplete}, ...baseItems]
-        : [{icon: <Check/>, label: 'Check-in', action: () => handleUpdateCount(1)}, ...baseItems];
+        ? [
+            {icon: <Undo/>, label: 'Undo complete', action: handleUndoComplete},
+            ...baseItems
+        ]
+        : [
+            {icon: <Check/>, label: 'Check-in', action: () => handleUpdateCount(1)},
+            {icon: <Keyboard/>, label: 'Log Progress', action: () => setLogging(true)},
+            ...baseItems
+        ];
 
     const [logging, setLogging] = useState(false);
     const handleLogging = async (value: number) => {

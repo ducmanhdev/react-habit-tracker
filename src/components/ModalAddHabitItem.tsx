@@ -238,6 +238,7 @@ const ModalHabitItem = forwardRef((_props, ref) => {
                                             options={habitGroupOptions}
                                             value={field.value}
                                             onChange={field.onChange}
+                                            clearable
                                         />
                                     </FormControl>
                                     <FormMessage/>

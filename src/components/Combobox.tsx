@@ -1,5 +1,5 @@
 import {useState, useMemo} from "react";
-import {Check, ChevronsUpDown} from "lucide-react";
+import {Check, ChevronsUpDown, XCircle} from "lucide-react";
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
 import {
@@ -22,11 +22,12 @@ type ComboBoxPropsBase<T> = {
     options: Option<T>[];
     buttonClassName?: string;
     placeholder?: string;
+    clearable?: boolean;
 };
 
 type ComboboxPropsSingle<T> = ComboBoxPropsBase<T> & {
-    value: T;
-    onChange: (value: T) => void;
+    value: T | undefined;
+    onChange: (value: T | undefined) => void;
     multiple?: false;
 };
 
@@ -38,17 +39,17 @@ type ComboboxPropsMultiple<T> = ComboBoxPropsBase<T> & {
 
 type ComboboxProps<T> = ComboboxPropsSingle<T> | ComboboxPropsMultiple<T>;
 
-export const Combobox = <T,>({
-                                 options,
-                                 value,
-                                 onChange,
-                                 buttonClassName,
-                                 placeholder = "Select...",
-                                 multiple,
-                             }: ComboboxProps<T>) => {
+export const Combobox = <T, >({
+                                  options,
+                                  value,
+                                  onChange,
+                                  buttonClassName,
+                                  placeholder = "Select...",
+                                  multiple,
+                                  clearable = false,
+                              }: ComboboxProps<T>) => {
     const [open, setOpen] = useState(false);
 
-    // Helper to handle selection logic
     const handleSelect = (currentValue: T) => {
         if (multiple) {
             const selectedValues = value as T[];
@@ -80,6 +81,18 @@ export const Combobox = <T,>({
         return multiple ? (value as T[]).includes(optionValue) : value === optionValue;
     };
 
+    const hasValue = multiple
+        ? (Array.isArray(value) && value.length > 0)
+        : value != null && value !== '';
+
+    const handleClear = () => {
+        if (multiple) {
+            onChange([])
+        } else {
+            onChange(undefined);
+        }
+    }
+
     return (
         <Popover open={open} onOpenChange={setOpen} modal>
             <PopoverTrigger asChild>
@@ -87,15 +100,24 @@ export const Combobox = <T,>({
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className={cn("justify-between", buttonClassName)}
+                    className={cn("", buttonClassName)}
                 >
                     {buttonLabel}
-                    <ChevronsUpDown className="opacity-50" />
+                    <ChevronsUpDown className="ml-auto opacity-50"/>
+                    {
+                        (hasValue && clearable) && <XCircle
+                            className="opacity-50"
+                            onClick={e => {
+                                e.stopPropagation();
+                                handleClear();
+                            }}
+                        />
+                    }
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="popover-fw p-0">
                 <Command>
-                    <CommandInput placeholder="Search..." />
+                    <CommandInput placeholder="Search..."/>
                     <CommandList>
                         <CommandEmpty>No options found.</CommandEmpty>
                         <CommandGroup>

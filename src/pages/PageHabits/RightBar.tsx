@@ -14,7 +14,7 @@ type RightBarProps = {
 
 const RightBar = ({currentHabit, onEdit}: RightBarProps) => {
     const modalConfirm = useModalConfirm();
-    const del = useMutation(api.habits.deleteHabitItem);
+    const del = useMutation(api.habitItems.deleteItem);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const handleDelete = () => {
         modalConfirm.confirm(async () => {

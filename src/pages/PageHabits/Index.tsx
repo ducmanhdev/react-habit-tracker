@@ -17,7 +17,7 @@ const Index = () => {
     const {habitGroupId} = useParams();
     const [filteredHabits, setFilteredHabits] = useState<FilteredData>();
     const [currentHabit, setCurrentHabit] = useState<Doc<"habitItems">>();
-    const habitItems = useQuery(api.habits.getHabitItems, {
+    const habitItems = useQuery(api.habitItems.getItems, {
         search: filteredHabits?.search,
         date: filteredHabits?.date?.valueOf(),
         order: filteredHabits?.order,

@@ -82,10 +82,10 @@ const HabitItem = ({
                    }: HabitItemProps) => {
     const modalConfirm = useModalConfirm();
 
-    const archive = useMutation(api.habits.archiveHabitItem);
-    const del = useMutation(api.habits.deleteHabitItem);
-    const updateCompletedCount = useMutation(api.habits.updateCompletedCount);
-    const resetCompletedCount = useMutation(api.habits.resetCompletedCount);
+    const archive = useMutation(api.habitItems.archiveItem);
+    const del = useMutation(api.habitItems.deleteItem);
+    const updateCompletedCount = useMutation(api.habitItems.updateCompletedCount);
+    const resetCompletedCount = useMutation(api.habitItems.resetCompletedCount);
 
     const [completed, setCompleted] = useState(false);
     useEffect(() => {

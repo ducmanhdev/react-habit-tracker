@@ -48,9 +48,9 @@ const ModalAddHabitGroup = forwardRef((_props, ref) => {
     }));
 
     const modalConfirm = useModalConfirm();
-    const add = useMutation(api.habits.addHabitGroup);
-    const update = useMutation(api.habits.updateHabitGroup);
-    const del = useMutation(api.habits.deleteHabitGroup);
+    const add = useMutation(api.habitGroups.addGroup);
+    const update = useMutation(api.habitGroups.updateGroup);
+    const del = useMutation(api.habitGroups.deleteGroup);
 
     const [open, setOpen] = useState(false);
     const [groupId, setGroupId] = useState<FormData["id"]>();

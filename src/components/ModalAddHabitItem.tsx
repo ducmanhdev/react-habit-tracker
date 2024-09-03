@@ -148,11 +148,11 @@ const ModalHabitItem = forwardRef((_props, ref) => {
     }));
 
     const modalConfirm = useModalConfirm();
-    const habitGroups = useQuery(api.habits.getHabitGroups);
+    const habitGroups = useQuery(api.habitGroups.getGroups);
 
-    const add = useMutation(api.habits.addHabitItem);
-    const update = useMutation(api.habits.updateHabitItem);
-    const del = useMutation(api.habits.deleteHabitItem);
+    const add = useMutation(api.habitItems.addItem);
+    const update = useMutation(api.habitItems.updateItem);
+    const del = useMutation(api.habitItems.deleteItem);
 
     const [open, setOpen] = useState(false);
     const form = useForm<FormData>({

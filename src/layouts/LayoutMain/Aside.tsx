@@ -78,7 +78,7 @@ const Aside = () => {
     const location = useLocation();
     const {signOut} = useAuthActions();
     const currentUser = useQuery(api.users.currentUser);
-    const habitGroups = useQuery(api.habits.getHabitGroups);
+    const habitGroups = useQuery(api.habitGroups.getGroups);
 
     const main: AsideMenuItemProps[] = [
         {id: 1, label: "All habits", icon: "SquareLibrary", route: "/habits"},

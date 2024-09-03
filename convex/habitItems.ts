@@ -5,78 +5,7 @@ import {getUserId} from "./utils";
 import dayjs from "dayjs";
 import {HABIT_GOAL_TIME_UNITS, HABIT_GOAL_UNITS, HABIT_SCHEDULE_TYPES} from "../src/constants/habits";
 
-export const getHabitGroups = query({
-    args: {},
-    handler: async (ctx) => {
-        const userId = await getUserId(ctx);
-        return await ctx.db.query("habitGroups")
-            .filter((q) => q.eq(q.field("userId"), userId))
-            .collect()
-    },
-});
-
-export const addHabitGroup = mutation({
-    args: {
-        name: v.string(),
-        icon: v.optional(v.string()),
-    },
-    handler: async (ctx, args) => {
-        const userId = await getUserId(ctx);
-        const id = await ctx.db.insert("habitGroups", {
-            userId: userId,
-            name: args.name,
-            icon: args.icon,
-        })
-        return {id};
-    },
-});
-
-export const updateHabitGroup = mutation({
-    args: {
-        id: v.id("habitGroups"),
-        name: v.string(),
-        icon: v.optional(v.string()),
-    },
-    handler: async (ctx, args) => {
-        const userId = await getUserId(ctx);
-
-        const habitGroup = await ctx.db.get(args.id);
-        if (!habitGroup) {
-            throw new ConvexError("Habit group not found");
-        }
-
-        if (habitGroup.userId !== userId) {
-            throw new ConvexError("Unauthorized to update this habit group");
-        }
-
-        await ctx.db.patch(args.id, {
-            ...habitGroup,
-            ...args
-        })
-    },
-});
-
-export const deleteHabitGroup = mutation({
-    args: {
-        id: v.id("habitGroups"),
-    },
-    handler: async (ctx, args) => {
-        const userId = await getUserId(ctx);
-
-        const habitGroup = await ctx.db.get(args.id);
-        if (!habitGroup) {
-            throw new ConvexError("Habit group not found");
-        }
-
-        if (habitGroup.userId !== userId) {
-            throw new ConvexError("Unauthorized to delete this habit group");
-        }
-
-        await ctx.db.delete(args.id)
-    },
-});
-
-export const getHabitItems = query({
+export const getItems = query({
     args: {
         search: v.optional(v.string()),
         date: v.optional(v.number()),
@@ -121,7 +50,7 @@ export const getHabitItems = query({
     },
 });
 
-export const addHabitItem = mutation({
+export const addItem = mutation({
     args: {
         name: v.string(),
         icon: v.optional(v.string()),
@@ -169,7 +98,7 @@ export const addHabitItem = mutation({
     },
 });
 
-export const updateHabitItem = mutation({
+export const updateItem = mutation({
     args: {
         id: v.id("habitItems"),
         groupId: v.optional(v.id("habitGroups")),
@@ -311,7 +240,7 @@ export const resetCompletedCount = mutation({
     },
 });
 
-export const deleteHabitItem = mutation({
+export const deleteItem = mutation({
     args: {
         id: v.id("habitItems"),
     },
@@ -331,7 +260,7 @@ export const deleteHabitItem = mutation({
     },
 });
 
-export const archiveHabitItem = mutation({
+export const archiveItem = mutation({
     args: {
         id: v.id("habitItems"),
         value: v.boolean(),

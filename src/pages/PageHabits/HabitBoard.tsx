@@ -34,12 +34,6 @@ const HabitBoard = ({currentHabit}: HabitBoardProps) => {
             </Card>
             <Card>
                 <CardHeader>
-                    <CardDescription>Skipped</CardDescription>
-                    <CardTitle>0 days</CardTitle>
-                </CardHeader>
-            </Card>
-            <Card>
-                <CardHeader>
                     <CardDescription>Total</CardDescription>
                     <CardTitle>0 {currentHabit.goal.unit}</CardTitle>
                 </CardHeader>

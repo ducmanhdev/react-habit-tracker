@@ -82,8 +82,10 @@ export const getHabitItems = query({
         date: v.optional(v.number()),
         order: v.optional(v.string()),
         groupId: v.optional(v.id("habitGroups")),
+        getArchived: v.optional(v.boolean()),
+        getDeleted: v.optional(v.boolean()),
     },
-    handler: async (ctx, {search, date, order, groupId}) => {
+    handler: async (ctx, {search, date, order, groupId, getArchived = false, getDeleted = false}) => {
         const currentDate = date && dayjs(date).isValid() ? dayjs(date) : null;
         const userId = await getUserId(ctx);
         return filter(
@@ -92,6 +94,8 @@ export const getHabitItems = query({
                 const matchesUserId = habit.userId === userId;
                 const matchesGroup = groupId ? habit.groupId === groupId : true;
                 const matchesSearch = search ? habit.name.toLowerCase().includes(search.toLowerCase()) : true;
+                const matchesArchived = getArchived || !habit.isArchived;
+                const matchesDeleted = getDeleted || !habit.isDeleted;
 
                 const {schedule, startDate, lastCompleted} = habit;
 
@@ -109,7 +113,7 @@ export const getHabitItems = query({
 
                 const matchesDate = !currentDate || (shouldDoToday && (!lastCompleted || !dayjs(lastCompleted).isSame(currentDate, 'date')));
 
-                return matchesUserId && matchesGroup && matchesSearch && matchesDate;
+                return matchesUserId && matchesGroup && matchesSearch && matchesArchived && matchesDeleted && matchesDate;
             }
         )
             .order(order === "a-z" ? "desc" : "asc")
@@ -157,6 +161,8 @@ export const addHabitItem = mutation({
             },
             startDate: args.startDate,
             streak: 0,
+            isArchived: false,
+            isDeleted: false,
         });
 
         return {id};
@@ -322,5 +328,28 @@ export const deleteHabitItem = mutation({
         }
 
         await ctx.db.delete(args.id)
+    },
+});
+
+export const archiveHabitItem = mutation({
+    args: {
+        id: v.id("habitItems"),
+        value: v.boolean(),
+    },
+    handler: async (ctx, {id, value}) => {
+        const userId = await getUserId(ctx);
+
+        const habitItem = await ctx.db.get(id);
+        if (!habitItem) {
+            throw new ConvexError("Habit item not found");
+        }
+
+        if (habitItem.userId !== userId) {
+            throw new ConvexError("Unauthorized");
+        }
+
+        await ctx.db.patch(habitItem._id, {
+            isArchived: value
+        })
     },
 });

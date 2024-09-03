@@ -30,6 +30,8 @@ const schema = defineSchema({
         streak: v.number(),
         lastCompleted: v.optional(v.number()),
         startDate: v.number(),
+        isArchived: v.optional(v.boolean()),
+        isDeleted: v.optional(v.boolean()),
     }),
 });
 

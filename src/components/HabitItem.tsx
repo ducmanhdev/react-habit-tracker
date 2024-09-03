@@ -1,5 +1,17 @@
 import {useEffect, useRef, useState} from "react";
-import {ChartNoAxesColumn, Check, EllipsisVertical, Keyboard, Pencil, Plus, Timer, Trash, Undo, X} from "lucide-react"
+import {
+    ChartNoAxesColumn,
+    Check,
+    EllipsisVertical,
+    Keyboard,
+    Pencil,
+    Plus,
+    Timer,
+    Trash,
+    Undo,
+    X,
+    Archive
+} from "lucide-react"
 import {Button} from "@/components/ui/button.tsx";
 import {
     DropdownMenu,
@@ -70,6 +82,7 @@ const HabitItem = ({
                    }: HabitItemProps) => {
     const modalConfirm = useModalConfirm();
 
+    const archive = useMutation(api.habits.archiveHabitItem);
     const del = useMutation(api.habits.deleteHabitItem);
     const updateCompletedCount = useMutation(api.habits.updateCompletedCount);
     const resetCompletedCount = useMutation(api.habits.resetCompletedCount);
@@ -89,13 +102,25 @@ const HabitItem = ({
             try {
                 setDeleteLoading(true);
                 await del({id: habit._id});
-                toast.success('Deleted successfully');
+                toast.success('Delete successfully');
             } catch (error) {
                 toast.error('Delete failed');
             } finally {
                 setDeleteLoading(false);
             }
         })
+    }
+
+    const handleArchive = async () => {
+        try {
+            setDeleteLoading(true);
+            await archive({id: habit._id, value: !habit.isArchived});
+            toast.success('Archive successfully');
+        } catch (error) {
+            toast.error('Archive failed');
+        } finally {
+            setDeleteLoading(false);
+        }
     }
 
     const [updateCountLoading, setUpdateCountLoading] = useState(false);
@@ -125,6 +150,7 @@ const HabitItem = ({
         {icon: <Pencil/>, label: 'Edit', action: onEdit},
         {icon: <Keyboard/>, label: 'Log Progress', action: () => setLogging(true)},
         {icon: <ChartNoAxesColumn/>, label: 'View Progress', action: onClick},
+        {icon: <Archive/>, label: 'Archive', action: handleArchive},
         {icon: <Trash/>, label: 'Delete', action: handleDelete},
     ];
 

@@ -83,9 +83,9 @@ const HabitItem = ({
     const modalConfirm = useModalConfirm();
 
     const archiveItem = useMutation(api.habitItems.archiveItem);
-    // const restoreArchiveItem = useMutation(api.habitItems.restoreArchiveItem);
+    const restoreArchiveItem = useMutation(api.habitItems.restoreArchiveItem);
     const deleteItem = useMutation(api.habitItems.deleteItem);
-    // const restoreDeleteItem = useMutation(api.habitItems.restoreDeleteItem);
+    const restoreDeleteItem = useMutation(api.habitItems.restoreDeleteItem);
     const updateCompletedCount = useMutation(api.habitItems.updateCompletedCount);
     const resetCompletedCount = useMutation(api.habitItems.resetCompletedCount);
 
@@ -113,14 +113,14 @@ const HabitItem = ({
         })
     }
 
-    // const handleRestoreDelete = async () => {
-    //     try {
-    //         await restoreDeleteItem({id: habit._id});
-    //         toast.success('Restore successfully');
-    //     } catch (error) {
-    //         toast.error('Restore failed');
-    //     }
-    // }
+    const handleRestoreDelete = async () => {
+        try {
+            await restoreDeleteItem({id: habit._id});
+            toast.success('Restore successfully');
+        } catch (error) {
+            toast.error('Restore failed');
+        }
+    }
 
     const handleArchive = async () => {
         try {
@@ -131,14 +131,14 @@ const HabitItem = ({
         }
     }
 
-    // const handleRestoreArchive = async () => {
-    //     try {
-    //         await restoreArchiveItem({id: habit._id});
-    //         toast.success('Restore successfully');
-    //     } catch (error) {
-    //         toast.error('Restore failed');
-    //     }
-    // }
+    const handleRestoreArchive = async () => {
+        try {
+            await restoreArchiveItem({id: habit._id});
+            toast.success('Restore archive successfully');
+        } catch (error) {
+            toast.error('Restore archive failed');
+        }
+    }
 
     const [updateCountLoading, setUpdateCountLoading] = useState(false);
     const handleUpdateCount = async (increment: number) => {
@@ -166,8 +166,16 @@ const HabitItem = ({
     const baseItems = [
         {icon: <Pencil/>, label: 'Edit', action: onEdit},
         {icon: <ChartNoAxesColumn/>, label: 'View Progress', action: onClick},
-        {icon: <Archive/>, label: 'Archive', action: handleArchive},
-        {icon: <Trash/>, label: 'Delete', action: handleDelete},
+        {
+            icon: <Archive/>,
+            label: habit.isArchived ? 'Restore archive' : 'Archive',
+            action: habit.isArchived ? handleRestoreArchive : handleArchive,
+        },
+        {
+            icon: <Trash/>,
+            label: habit.isDeleted ? 'Restore delete' : 'Delete',
+            action: habit.isDeleted ? handleRestoreDelete : handleDelete,
+        },
     ];
 
     const menuItems = completed

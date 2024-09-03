@@ -21,7 +21,7 @@ const Index = () => {
         search: filteredHabits?.search,
         date: filteredHabits?.date?.valueOf(),
         order: filteredHabits?.order,
-        groupId: habitGroupId as Id<"habitGroups">
+        groupId: habitGroupId as Id<"habitGroups">,
     });
 
     useEffect(() => {

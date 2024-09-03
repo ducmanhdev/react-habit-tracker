@@ -82,8 +82,10 @@ const HabitItem = ({
                    }: HabitItemProps) => {
     const modalConfirm = useModalConfirm();
 
-    const archive = useMutation(api.habitItems.archiveItem);
-    const del = useMutation(api.habitItems.deleteItem);
+    const archiveItem = useMutation(api.habitItems.archiveItem);
+    // const restoreArchiveItem = useMutation(api.habitItems.restoreArchiveItem);
+    const deleteItem = useMutation(api.habitItems.deleteItem);
+    // const restoreDeleteItem = useMutation(api.habitItems.restoreDeleteItem);
     const updateCompletedCount = useMutation(api.habitItems.updateCompletedCount);
     const resetCompletedCount = useMutation(api.habitItems.resetCompletedCount);
 
@@ -101,7 +103,7 @@ const HabitItem = ({
         modalConfirm.confirm(async () => {
             try {
                 setDeleteLoading(true);
-                await del({id: habit._id});
+                await deleteItem({id: habit._id});
                 toast.success('Delete successfully');
             } catch (error) {
                 toast.error('Delete failed');
@@ -111,17 +113,32 @@ const HabitItem = ({
         })
     }
 
+    // const handleRestoreDelete = async () => {
+    //     try {
+    //         await restoreDeleteItem({id: habit._id});
+    //         toast.success('Restore successfully');
+    //     } catch (error) {
+    //         toast.error('Restore failed');
+    //     }
+    // }
+
     const handleArchive = async () => {
         try {
-            setDeleteLoading(true);
-            await archive({id: habit._id, value: !habit.isArchived});
+            await archiveItem({id: habit._id});
             toast.success('Archive successfully');
         } catch (error) {
             toast.error('Archive failed');
-        } finally {
-            setDeleteLoading(false);
         }
     }
+
+    // const handleRestoreArchive = async () => {
+    //     try {
+    //         await restoreArchiveItem({id: habit._id});
+    //         toast.success('Restore successfully');
+    //     } catch (error) {
+    //         toast.error('Restore failed');
+    //     }
+    // }
 
     const [updateCountLoading, setUpdateCountLoading] = useState(false);
     const handleUpdateCount = async (increment: number) => {

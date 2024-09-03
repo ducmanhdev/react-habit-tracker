@@ -125,8 +125,9 @@ export const updateItem = mutation({
         if (!habitItem) {
             throw new ConvexError("Habit item not found");
         }
+
         if (habitItem.userId !== userId) {
-            throw new ConvexError("Unauthorized to update this habit item");
+            throw new ConvexError("Unauthorized access: You do not have permission to perform this action");
         }
 
         const id = await ctx.db.patch(habitItem._id, {
@@ -164,8 +165,9 @@ export const updateCompletedCount = mutation({
         if (!habitItem) {
             throw new ConvexError("Habit item not found");
         }
+
         if (habitItem.userId !== userId) {
-            throw new ConvexError("Unauthorized to update this habit item");
+            throw new ConvexError("Unauthorized access: You do not have permission to perform this action");
         }
 
         const newCompletedCount = (habitItem.goal?.completedCount || 0) + args.increment;
@@ -223,8 +225,9 @@ export const resetCompletedCount = mutation({
         if (!habitItem) {
             throw new ConvexError("Habit item not found");
         }
+
         if (habitItem.userId !== userId) {
-            throw new ConvexError("Unauthorized to update this habit item");
+            throw new ConvexError("Unauthorized access: You do not have permission to perform this action");
         }
 
         const id = await ctx.db.patch(habitItem._id, {
@@ -253,19 +256,42 @@ export const deleteItem = mutation({
         }
 
         if (habitItem.userId !== userId) {
-            throw new ConvexError("Unauthorized to delete this habit item");
+            throw new ConvexError("Unauthorized access: You do not have permission to perform this action");
         }
 
-        await ctx.db.delete(args.id)
+        await ctx.db.patch(habitItem._id, {
+            isDeleted: true
+        })
+    },
+});
+
+export const restoreDeleteItem = mutation({
+    args: {
+        id: v.id("habitItems"),
+    },
+    handler: async (ctx, args) => {
+        const userId = await getUserId(ctx);
+
+        const habitItem = await ctx.db.get(args.id);
+        if (!habitItem) {
+            throw new ConvexError("Habit item not found");
+        }
+
+        if (habitItem.userId !== userId) {
+            throw new ConvexError("Unauthorized access: You do not have permission to perform this action");
+        }
+
+        await ctx.db.patch(habitItem._id, {
+            isDeleted: false,
+        })
     },
 });
 
 export const archiveItem = mutation({
     args: {
         id: v.id("habitItems"),
-        value: v.boolean(),
     },
-    handler: async (ctx, {id, value}) => {
+    handler: async (ctx, {id}) => {
         const userId = await getUserId(ctx);
 
         const habitItem = await ctx.db.get(id);
@@ -274,11 +300,33 @@ export const archiveItem = mutation({
         }
 
         if (habitItem.userId !== userId) {
-            throw new ConvexError("Unauthorized");
+            throw new ConvexError("Unauthorized access: You do not have permission to perform this action");
         }
 
         await ctx.db.patch(habitItem._id, {
-            isArchived: value
+            isArchived: true
+        })
+    },
+});
+
+export const restoreArchiveItem = mutation({
+    args: {
+        id: v.id("habitItems"),
+    },
+    handler: async (ctx, {id}) => {
+        const userId = await getUserId(ctx);
+
+        const habitItem = await ctx.db.get(id);
+        if (!habitItem) {
+            throw new ConvexError("Habit item not found");
+        }
+
+        if (habitItem.userId !== userId) {
+            throw new ConvexError("Unauthorized access: You do not have permission to perform this action");
+        }
+
+        await ctx.db.patch(habitItem._id, {
+            isArchived: false,
         })
     },
 });

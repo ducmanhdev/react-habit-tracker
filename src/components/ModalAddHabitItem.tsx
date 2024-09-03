@@ -189,7 +189,6 @@ const ModalHabitItem = forwardRef((_props, ref) => {
     const handleDelete = () => {
         modalConfirm.confirm(async () => {
             try {
-                console.log(1)
                 setDeleteLoading(true);
                 await del({
                     id: form.getValues("id") as Id<"habitItems">,

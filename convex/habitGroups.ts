@@ -43,7 +43,7 @@ export const updateGroup = mutation({
         }
 
         if (habitGroup.userId !== userId) {
-            throw new ConvexError("Unauthorized to update this habit group");
+            throw new ConvexError("Unauthorized access: You do not have permission to perform this action");
         }
 
         await ctx.db.patch(args.id, {
@@ -66,7 +66,7 @@ export const deleteGroup = mutation({
         }
 
         if (habitGroup.userId !== userId) {
-            throw new ConvexError("Unauthorized to delete this habit group");
+            throw new ConvexError("Unauthorized access: You do not have permission to perform this action");
         }
 
         await ctx.db.delete(args.id)

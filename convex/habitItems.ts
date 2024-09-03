@@ -50,6 +50,19 @@ export const getItems = query({
     },
 });
 
+export const getItem = query({
+    args: {
+        id: v.id("habitItems")
+    },
+    handler: async (ctx, {id}) => {
+        const userId = await getUserId(ctx);
+        return ctx.db
+            .query("habitItems")
+            .filter((q) => q.eq(q.field("_id"), id) && q.eq(q.field("userId"), userId))
+            .first();
+    },
+});
+
 export const addItem = mutation({
     args: {
         name: v.string(),

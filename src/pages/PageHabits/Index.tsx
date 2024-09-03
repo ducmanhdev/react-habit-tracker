@@ -1,14 +1,14 @@
 import {Separator} from "@/components/ui/separator.tsx"
 import LeftBar, {FilteredData} from "@/pages/PageHabits/LeftBar.tsx";
 import {useParams} from "react-router-dom";
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import RightBar from "@/pages/PageHabits/RightBar.tsx";
 import HabitBoard from "@/pages/PageHabits/HabitBoard.tsx";
 import CardHabitsEmpty from "./CardHabitsEmpty.tsx";
 import ModalAddHabitItem from "@/components/ModalAddHabitItem.tsx";
 import {useQuery} from "convex/react";
 import {api} from "../../../convex/_generated/api";
-import {Doc, Id} from "../../../convex/_generated/dataModel";
+import {Id} from "../../../convex/_generated/dataModel";
 import {ModalAddHabitItemRef} from "@/components/ModalAddHabitItem.tsx";
 import HabitItem from "@/components/HabitItem.tsx";
 import HabitItemSkeleton from "@/components/HabitItemSkeleton.tsx";
@@ -16,7 +16,7 @@ import HabitItemSkeleton from "@/components/HabitItemSkeleton.tsx";
 const Index = () => {
     const {habitGroupId} = useParams();
     const [filteredHabits, setFilteredHabits] = useState<FilteredData>();
-    const [currentHabit, setCurrentHabit] = useState<Doc<"habitItems">>();
+    const [currentHabitId, setCurrentHabitId] = useState<Id<"habitItems">>();
     const habitItems = useQuery(api.habitItems.getItems, {
         search: filteredHabits?.search,
         date: filteredHabits?.date?.valueOf(),
@@ -25,9 +25,15 @@ const Index = () => {
     });
 
     useEffect(() => {
-        if (habitItems?.findIndex(habit => habit._id === currentHabit?._id) !== -1) return;
-        setCurrentHabit(undefined);
-    }, [currentHabit?._id, habitItems]);
+        if (habitItems?.findIndex(habit => habit._id === currentHabitId) === -1) {
+            setCurrentHabitId(undefined);
+        }
+    }, [currentHabitId, habitItems]);
+
+    const currentHabit = useMemo(() => {
+        if (currentHabitId === undefined) return undefined;
+        return (habitItems || []).find(habit => habit._id === currentHabitId);
+    }, [currentHabitId, habitItems])
 
     const modalAddHabitIemRef = useRef<ModalAddHabitItemRef>(null);
     return (
@@ -58,8 +64,8 @@ const Index = () => {
                                     <HabitItem
                                         key={habit._id}
                                         habit={habit}
-                                        isActive={habit._id === currentHabit?._id}
-                                        onClick={() => setCurrentHabit(habit)}
+                                        isActive={habit._id === currentHabitId}
+                                        onClick={() => setCurrentHabitId(habit._id)}
                                         onEdit={() => modalAddHabitIemRef?.current?.open(habit)}
                                     />
                                 ))
@@ -68,7 +74,7 @@ const Index = () => {
                     </div>
                 </section>
                 {
-                    currentHabit?._id && (
+                    currentHabit && (
                         <section>
                             <RightBar
                                 currentHabit={currentHabit}

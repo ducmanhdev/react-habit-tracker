@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo } from 'react';
+import { lazy, Suspense, useMemo, memo } from 'react';
 import { LucideProps } from 'lucide-react';
 import dynamicIconImports from 'lucide-react/dynamicIconImports';
 
@@ -8,7 +8,7 @@ export type IconProps = Omit<LucideProps, 'ref'> & {
     name: keyof typeof dynamicIconImports;
 }
 
-const Icon = ({ name, ...props }: IconProps) => {
+const Icon = memo(({ name, ...props }: IconProps) => {
     const memoizedIconName = useMemo(() => dynamicIconImports[name] ? name : 'message-circle-warning', [name]);
     const LucideIcon = useMemo(() => lazy(dynamicIconImports[memoizedIconName]), [memoizedIconName]);
     return (
@@ -16,6 +16,6 @@ const Icon = ({ name, ...props }: IconProps) => {
             <LucideIcon {...props} />
         </Suspense>
     );
-}
+})
 
 export default Icon;

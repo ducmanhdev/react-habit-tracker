@@ -1,4 +1,4 @@
-import {useRef} from "react";
+import {useMemo, useRef, memo} from "react";
 import {NavLink, Link, NavLinkProps, useLocation} from "react-router-dom";
 import {
     DropdownMenu,
@@ -27,24 +27,27 @@ type AsideMenuItemProps = {
     isActive?: boolean;
 }
 
-const AsideMenuItem = ({
-                           id,
-                           icon,
-                           label,
-                           route,
-                           onClick,
-                           suffixIcon,
-                           suffixIconAction,
-                           isActive = false
-                       }: AsideMenuItemProps) => {
+const AsideMenuItem = memo(({
+                                id,
+                                icon,
+                                label,
+                                route,
+                                onClick,
+                                suffixIcon,
+                                suffixIconAction,
+                                isActive = false
+                            }: AsideMenuItemProps) => {
+
+    const iconName = useMemo(() => convertToKebabCase(icon), [icon]);
+    const suffixIconName = useMemo(() => suffixIcon ? convertToKebabCase(suffixIcon) : undefined, [suffixIcon]);
     const content = (
         <>
-            <Icon name={convertToKebabCase(icon) as IconProps["name"]} className="flex-shrink-0"/>
+            <Icon name={iconName as IconProps["name"]} className="flex-shrink-0"/>
             <span className="flex-grow overflow-hidden text-ellipsis">{label}</span>
             {
                 suffixIcon && (
                     <Icon
-                        name={convertToKebabCase(suffixIcon) as IconProps["name"]}
+                        name={suffixIconName as IconProps["name"]}
                         className="flex-shrink-0"
                         onClick={e => {
                             e.preventDefault();
@@ -72,7 +75,16 @@ const AsideMenuItem = ({
             )}
         </Button>
     );
-};
+});
+
+const main: AsideMenuItemProps[] = [
+    {id: 1, label: "All habits", icon: "SquareLibrary", route: "/habits"},
+]
+
+const settings: AsideMenuItemProps[] = [
+    {id: 1, label: "Manage habits", icon: "List", route: "/manage-habits"},
+    {id: 2, label: "App settings", icon: "Settings", route: "/settings"},
+]
 
 const Aside = () => {
     const location = useLocation();
@@ -80,12 +92,8 @@ const Aside = () => {
     const currentUser = useQuery(api.users.currentUser);
     const habitGroups = useQuery(api.habitGroups.getGroups);
 
-    const main: AsideMenuItemProps[] = [
-        {id: 1, label: "All habits", icon: "SquareLibrary", route: "/habits"},
-    ]
-
     const modalAddHabitGroupRef = useRef<ModalAddHabitGroupRef>(null);
-    const groups: AsideMenuItemProps[] = [
+    const groups: AsideMenuItemProps[] = useMemo(() => [
         ...(habitGroups || []).map(group => ({
             id: group._id,
             label: group.name,
@@ -104,14 +112,8 @@ const Aside = () => {
             icon: 'Plus',
             onClick: () => modalAddHabitGroupRef?.current?.open(),
         }
-    ]
-
-    const settings: AsideMenuItemProps[] = [
-        {id: 1, label: "Manage habits", icon: "List", route: "/manage-habits"},
-        {id: 2, label: "App settings", icon: "Settings", route: "/settings"},
-    ]
-
-    const navGroups = [
+    ], [habitGroups]);
+    const navGroups = useMemo(() => [
         {
             name: "",
             children: main
@@ -124,7 +126,8 @@ const Aside = () => {
             name: "PREFERENCES",
             children: settings
         }
-    ]
+    ], [groups]);
+
     return (
         <>
             <ModalAddHabitGroup ref={modalAddHabitGroupRef}/>

@@ -8,7 +8,7 @@ export type IconProps = Omit<LucideProps, 'ref'> & {
     name: keyof typeof dynamicIconImports;
 }
 
-const Icon = memo(({ name, ...props }: IconProps) => {
+const Icon = ({ name, ...props }: IconProps) => {
     const memoizedIconName = useMemo(() => dynamicIconImports[name] ? name : 'message-circle-warning', [name]);
     const LucideIcon = useMemo(() => lazy(dynamicIconImports[memoizedIconName]), [memoizedIconName]);
     return (
@@ -16,6 +16,6 @@ const Icon = memo(({ name, ...props }: IconProps) => {
             <LucideIcon {...props} />
         </Suspense>
     );
-})
+}
 
-export default Icon;
+export default memo(Icon);

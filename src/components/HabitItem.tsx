@@ -23,10 +23,9 @@ import {useMutation} from "convex/react";
 import {api} from "../../convex/_generated/api";
 import {toast} from "sonner";
 import {Doc} from "../../convex/_generated/dataModel";
-import Icon, {IconProps} from "@/components/Icon.tsx";
+import Icon from "@/components/Icon.tsx";
 import dayjs from "dayjs";
 import {Input} from "@/components/ui/input.tsx";
-import {convertToKebabCase} from "@/utils/text.ts";
 import {isToday} from "@/utils/date.ts";
 import {useModalConfirm} from "@/providers/modal-confirm-provider.tsx";
 
@@ -250,7 +249,7 @@ const HabitItem = ({
         >
             <div className="border rounded p-2 w-10 h-10 flex justify-center items-center">
                 <Icon
-                    name={(habit.icon ? convertToKebabCase(habit.icon) : "") as IconProps["name"]}
+                    name={habit.icon}
                     width={20}
                     height={20}
                 />

@@ -13,8 +13,7 @@ import {useQuery} from "convex/react";
 import {api} from "../../../convex/_generated/api";
 import {Avatar, AvatarImage, AvatarFallback} from "@/components/ui/avatar.tsx";
 import ModalAddHabitGroup, {ModalAddHabitGroupRef} from "@/components/ModalAddHabitGroup.tsx";
-import Icon, {IconProps} from "@/components/Icon.tsx"
-import {convertToKebabCase} from "@/utils/text.ts";
+import Icon from "@/components/Icon.tsx";
 
 type AsideMenuItemProps = {
     id?: number | string;
@@ -38,16 +37,14 @@ const AsideMenuItem = memo(({
                                 isActive = false
                             }: AsideMenuItemProps) => {
 
-    const iconName = useMemo(() => convertToKebabCase(icon), [icon]);
-    const suffixIconName = useMemo(() => suffixIcon ? convertToKebabCase(suffixIcon) : undefined, [suffixIcon]);
     const content = (
         <>
-            <Icon name={iconName as IconProps["name"]} className="flex-shrink-0"/>
+            <Icon name={icon} className="flex-shrink-0"/>
             <span className="flex-grow overflow-hidden text-ellipsis">{label}</span>
             {
                 suffixIcon && (
                     <Icon
-                        name={suffixIconName as IconProps["name"]}
+                        name={suffixIcon}
                         className="flex-shrink-0"
                         onClick={e => {
                             e.preventDefault();

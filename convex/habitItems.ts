@@ -1,9 +1,26 @@
-import {mutation, query} from "./_generated/server";
+import {mutation, query, internalMutation, MutationCtx} from "./_generated/server";
 import {filter} from "convex-helpers/server/filter";
 import {ConvexError, v} from "convex/values";
 import {getUserId} from "./utils";
 import dayjs from "dayjs";
 import {HABIT_GOAL_TIME_UNITS, HABIT_GOAL_UNITS, HABIT_SCHEDULE_TYPES} from "../src/constants/habits";
+import {internal} from "./_generated/api";
+import ms from "ms";
+import {Id} from "./_generated/dataModel";
+
+const handleCancelDeleteItemScheduler = async (ctx: MutationCtx, habitId: Id<"habitItems">) => {
+    const scheduler = await filter(
+        ctx.db.system.query("_scheduled_functions"),
+        (schedule) => {
+            const isBelongToHabit = schedule.args.findIndex(arg => arg.id === habitId) !== -1;
+            const isPending = schedule.state.kind === "pending";
+            return isBelongToHabit && isPending;
+        }
+    ).first();
+    if (scheduler) {
+        await ctx.scheduler.cancel(scheduler._id);
+    }
+}
 
 export const getItems = query({
     args: {
@@ -273,8 +290,22 @@ export const deleteItem = mutation({
         }
 
         await ctx.db.patch(habitItem._id, {
-            isDeleted: true
-        })
+            isDeleted: true,
+        });
+
+        await ctx.scheduler.runAfter(ms("10 days"), internal.habitItems.internalDeleteItemCompletely, {
+            id: habitItem._id,
+        });
+    },
+});
+
+export const internalDeleteItemCompletely = internalMutation({
+    args: {
+        id: v.id("habitItems"),
+    },
+    handler: async (ctx, args) => {
+        await ctx.db.delete(args.id);
+        await handleCancelDeleteItemScheduler(ctx, args.id);
     },
 });
 
@@ -296,7 +327,9 @@ export const restoreDeleteItem = mutation({
 
         await ctx.db.patch(habitItem._id, {
             isDeleted: false,
-        })
+        });
+
+        await handleCancelDeleteItemScheduler(ctx, habitItem._id);
     },
 });
 

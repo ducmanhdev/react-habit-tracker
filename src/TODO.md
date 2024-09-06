@@ -1,9 +1,9 @@
 ### priority
 1. Update patch of convex.
-2. ~~_Add confirm before deleting._~~
-3. Habit item: Add property delete instead of remove it directly
-4. Habit item: Add automatically delete after few's day.
-5. Habit item: Add restore delete.
+2. ~~Add confirm before deleting.~~
+3. ~~Habit item: Add property delete instead of remove it directly~~
+4. ~~Habit item: Add automatically delete after few's day.~~
+5. ~~Habit item: Add restore delete.~~
 6. Habit item: Complete feature archive and restore archive.
 7. Habit item: Add countdown timer.
 8. Habit item: Add feature drag move to new habit groups.

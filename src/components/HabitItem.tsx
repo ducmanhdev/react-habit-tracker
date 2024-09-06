@@ -163,30 +163,25 @@ const HabitItem = ({
         }
     }
 
-    const baseItems = [
-        {icon: <Pencil/>, label: 'Edit', action: onEdit},
-        {icon: <ChartNoAxesColumn/>, label: 'View Progress', action: onClick},
-        {
-            icon: <Archive/>,
-            label: habit.isArchived ? 'Restore archive' : 'Archive',
-            action: habit.isArchived ? handleRestoreArchive : handleArchive,
-        },
-        {
-            icon: <Trash/>,
-            label: habit.isDeleted ? 'Restore delete' : 'Delete',
-            action: habit.isDeleted ? handleRestoreDelete : handleDelete,
-        },
-    ];
-
-    const menuItems = completed
-        ? [
-            {icon: <Undo/>, label: 'Undo complete', action: handleUndoComplete},
-            ...baseItems
-        ]
+    const actionItemsForCompletedHabit = completed
+        ? [{icon: <Undo/>, label: 'Undo complete', action: handleUndoComplete}]
         : [
             {icon: <Check/>, label: 'Check-in', action: () => handleUpdateCount(1)},
             {icon: <Keyboard/>, label: 'Log Progress', action: () => setLogging(true)},
-            ...baseItems
+        ];
+
+    const archiveActionItem = habit.isArchived
+        ? { icon: <Archive/>, label: 'Restore archive', action: handleRestoreArchive }
+        : { icon: <Archive/>, label: 'Archive', action: handleArchive };
+
+    const menuItems = habit.isDeleted
+        ? [{icon: <Trash/>, label: 'Restore delete', action: handleRestoreDelete}]
+        : [
+            ...actionItemsForCompletedHabit,
+            {icon: <Pencil/>, label: 'Edit', action: onEdit},
+            {icon: <ChartNoAxesColumn/>, label: 'View Progress', action: onClick},
+            archiveActionItem,
+            {icon: <Trash/>, label: 'Delete', action: handleDelete},
         ];
 
     const [logging, setLogging] = useState(false);

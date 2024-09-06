@@ -22,7 +22,6 @@ const Index = () => {
         date: filteredHabits?.date?.valueOf(),
         order: filteredHabits?.order,
         groupId: habitGroupId as Id<"habitGroups">,
-        getDeleted: true,
     });
 
     useEffect(() => {

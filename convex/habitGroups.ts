@@ -69,6 +69,10 @@ export const deleteGroup = mutation({
             throw new ConvexError("Unauthorized access: You do not have permission to perform this action");
         }
 
-        await ctx.db.delete(args.id)
+        const children = await ctx.db.query("habitItems")
+            .filter((q) => q.eq(q.field("groupId"), habitGroup._id))
+            .collect();
+        await Promise.all(children.map(child => ctx.db.delete(child._id)));
+        await ctx.db.delete(habitGroup._id);
     },
 });

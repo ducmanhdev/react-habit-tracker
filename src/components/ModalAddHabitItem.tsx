@@ -128,7 +128,7 @@ export type ModalAddHabitItemRef = {
     open: (initialValue?: ModalOpenInputProps) => void
 }
 
-const ModalHabitItem = forwardRef((_props, ref) => {
+const ModalAddHabitItem = forwardRef((_props, ref) => {
     useImperativeHandle(ref, () => ({
         open: (initialValue?: ModalOpenInputProps) => {
             if (initialValue && "_id" in initialValue) {
@@ -461,4 +461,4 @@ const ModalHabitItem = forwardRef((_props, ref) => {
     );
 });
 
-export default ModalHabitItem;
+export default ModalAddHabitItem;

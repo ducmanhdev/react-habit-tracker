@@ -14,12 +14,12 @@ export type ModalConfirmRef = {
     open: (onConfirm: () => void) => void
 }
 
-export const ModalConfirm = forwardRef((_props, ref) => {
+export const ModalConfirm = forwardRef<ModalConfirmRef>((_props, ref) => {
     const [open, setOpen] = useState(false);
     const [onConfirmCallback, setOnConfirmCallback] = useState<(() => void) | null>(null);
 
     useImperativeHandle(ref, () => ({
-        open: (onConfirm: () => void) => {
+        open: (onConfirm) => {
             setOnConfirmCallback(() => onConfirm);
             setOpen(true);
         }

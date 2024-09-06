@@ -29,9 +29,9 @@ export type ModalAddHabitGroupRef = {
     open: (initialValue?: FormData) => void
 }
 
-const ModalAddHabitGroup = forwardRef((_props, ref) => {
+const ModalAddHabitGroup = forwardRef<ModalAddHabitGroupRef>((_props, ref) => {
     useImperativeHandle(ref, () => ({
-        open: (initialValue?: FormData) => {
+        open: (initialValue) => {
             if (initialValue) {
                 setGroupId(initialValue?.id)
                 form.reset({

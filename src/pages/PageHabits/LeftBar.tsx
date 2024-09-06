@@ -77,10 +77,10 @@ const LeftBar = ({onFilter, onCreateHabit}: PageHabitsLeftBarProps) => {
                         >
                             <Calendar/>
                         </Button> :
-                        <DatePicker value={date} onChange={setDate} buttonClasses="w-[210px]"/>
+                        <DatePicker value={date} onChange={setDate} buttonClasses="w-[220px]"/>
                 }
                 <Select value={order} onValueChange={setOrder}>
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-[220px]">
                         <ArrowUpDown className="h-4 w-4"/>
                         <SelectValue/>
                     </SelectTrigger>

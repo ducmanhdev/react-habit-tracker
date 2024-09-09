@@ -170,8 +170,8 @@ const HabitItem = ({
         ];
 
     const archiveActionItem = habit.isArchived
-        ? { icon: <Archive/>, label: 'Restore archive', action: handleRestoreArchive }
-        : { icon: <Archive/>, label: 'Archive', action: handleArchive };
+        ? {icon: <Archive/>, label: 'Restore archive', action: handleRestoreArchive}
+        : {icon: <Archive/>, label: 'Archive', action: handleArchive};
 
     const menuItems = habit.isDeleted
         ? [{icon: <Trash/>, label: 'Restore delete', action: handleRestoreDelete}]
@@ -186,7 +186,9 @@ const HabitItem = ({
     const [logging, setLogging] = useState(false);
     const handleLogging = async (value: number) => {
         try {
-            await updateCompletedCount({id: habit._id, increment: value})
+            if (value !== 0) {
+                await updateCompletedCount({id: habit._id, increment: value});
+            }
             setLogging(false);
         } catch (error) {
             toast.error('Update failed');

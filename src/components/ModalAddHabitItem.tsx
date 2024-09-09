@@ -159,6 +159,9 @@ const ModalAddHabitItem = forwardRef<ModalAddHabitItemRef>((_props, ref) => {
         resolver: zodResolver(formSchema),
     });
     const [submitLoading, setSubmitLoading] = useState(false);
+
+
+    form.getValues()
     const onSubmit = async (values: FormData) => {
         try {
             setSubmitLoading(true);
@@ -236,7 +239,8 @@ const ModalAddHabitItem = forwardRef<ModalAddHabitItemRef>((_props, ref) => {
                                             buttonClassName="w-full"
                                             options={habitGroupOptions}
                                             value={field.value}
-                                            onChange={field.onChange}
+                                            // TODO temporary
+                                            onChange={value => field.onChange(value ?? "")}
                                             clearable
                                         />
                                     </FormControl>

@@ -28,10 +28,10 @@ export const getItems = query({
         date: v.optional(v.number()),
         order: v.optional(v.string()),
         groupId: v.optional(v.id("habitGroups")),
-        getArchived: v.optional(v.boolean()),
-        getDeleted: v.optional(v.boolean()),
+        includeArchived: v.optional(v.boolean()),
+        includeDeleted: v.optional(v.boolean()),
     },
-    handler: async (ctx, {search, date, order, groupId, getArchived = false, getDeleted = false}) => {
+    handler: async (ctx, {search, date, order, groupId, includeArchived = false, includeDeleted = false}) => {
         const currentDate = date && dayjs(date).isValid() ? dayjs(date) : null;
         const userId = await getUserId(ctx);
         return filter(
@@ -40,8 +40,8 @@ export const getItems = query({
                 const matchesUserId = habit.userId === userId;
                 const matchesGroup = groupId ? habit.groupId === groupId : true;
                 const matchesSearch = search ? habit.name.toLowerCase().includes(search.toLowerCase()) : true;
-                const matchesArchived = getArchived || !habit.isArchived;
-                const matchesDeleted = getDeleted || !habit.isDeleted;
+                const matchesArchived = includeArchived || !habit.isArchived;
+                const matchesDeleted = includeDeleted || !habit.isDeleted;
 
                 const {schedule, startDate, lastCompleted} = habit;
 

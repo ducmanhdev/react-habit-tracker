@@ -7,10 +7,9 @@ import {
     Pencil,
     Plus,
     Timer,
-    Trash,
     Undo,
     X,
-    Archive
+    Archive, Trash2, ArchiveRestore
 } from "lucide-react"
 import {Button} from "@/components/ui/button.tsx";
 import {
@@ -32,8 +31,9 @@ import {useModalConfirm} from "@/providers/modal-confirm-provider.tsx";
 type HabitItemProps = {
     habit: Doc<"habitItems">;
     isActive?: boolean;
-    onClick: () => void;
-    onEdit: () => void;
+    isMinimalist?: boolean;
+    onClick?: () => void;
+    onEdit?: () => void;
 }
 
 type LogInputProps = {
@@ -76,6 +76,7 @@ const LogInput = ({unit, onAccept, onCancel}: LogInputProps) => {
 const HabitItem = ({
                        habit,
                        isActive = false,
+                       isMinimalist = false,
                        onClick,
                        onEdit
                    }: HabitItemProps) => {
@@ -162,7 +163,9 @@ const HabitItem = ({
         }
     }
 
-    const actionItemsForCompletedHabit = completed
+    const isCanLogProgress = !completed && !isMinimalist;
+
+    const logProgressActionItems = completed
         ? [{icon: <Undo/>, label: 'Undo complete', action: handleUndoComplete}]
         : [
             {icon: <Check/>, label: 'Check-in', action: () => handleUpdateCount(1)},
@@ -170,18 +173,37 @@ const HabitItem = ({
         ];
 
     const archiveActionItem = habit.isArchived
-        ? {icon: <Archive/>, label: 'Restore archive', action: handleRestoreArchive}
+        ? {icon: <ArchiveRestore/>, label: 'Restore archive', action: handleRestoreArchive}
         : {icon: <Archive/>, label: 'Archive', action: handleArchive};
 
-    const menuItems = habit.isDeleted
-        ? [{icon: <Trash/>, label: 'Restore delete', action: handleRestoreDelete}]
+    const deleteActionItem = habit.isDeleted
+        ? {icon: <Trash2/>, label: 'Restore delete', action: handleRestoreDelete}
+        : {icon: <Trash2/>, label: 'Delete', action: handleDelete}
+
+    const menuItemsMinimalist = habit.isDeleted
+        ? [
+            deleteActionItem,
+        ]
         : [
-            ...actionItemsForCompletedHabit,
+            archiveActionItem,
+            deleteActionItem,
+        ]
+
+    const menuItemsUndeleted = habit.isDeleted
+        ? []
+        : [
+            ...logProgressActionItems,
             {icon: <Pencil/>, label: 'Edit', action: onEdit},
             {icon: <ChartNoAxesColumn/>, label: 'View Progress', action: onClick},
             archiveActionItem,
-            {icon: <Trash/>, label: 'Delete', action: handleDelete},
-        ];
+        ]
+
+    const menuItemsFull = [
+        ...menuItemsUndeleted,
+        deleteActionItem,
+    ]
+
+    const menuItems = isMinimalist ? menuItemsMinimalist : menuItemsFull;
 
     const [logging, setLogging] = useState(false);
     const handleLogging = async (value: number) => {
@@ -233,7 +255,6 @@ const HabitItem = ({
                 </Button>
         }
     })();
-
     return (
         <div
             className={
@@ -242,7 +263,7 @@ const HabitItem = ({
                 ${completed && "opacity-80"}
                 `
             }
-            onClick={() => onClick()}
+            onClick={() => onClick?.()}
         >
             <div className="border rounded p-2 w-10 h-10 flex justify-center items-center">
                 <Icon
@@ -261,17 +282,16 @@ const HabitItem = ({
             </div>
             <div className="flex gap-2">
                 {
-                    !completed && (
+                    isCanLogProgress && (
                         logging
                             ? <LogInput
                                 unit={habit.goal.unit}
                                 onAccept={handleLogging}
                                 onCancel={() => setLogging(false)}
                             />
-                            : (
-                                actionButton
-                            )
-                    )}
+                            : actionButton
+                    )
+                }
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild disabled={deleteLoading}>
                         <Button variant="secondary" size="sm" className="w-full">
@@ -284,7 +304,7 @@ const HabitItem = ({
                                 key={index}
                                 onClick={e => {
                                     e.stopPropagation();
-                                    item.action();
+                                    item.action?.();
                                 }}
                                 className="flex items-center gap-2 cursor-pointer [&_.lucide]:w-4 [&_.lucide]:h-4"
                             >

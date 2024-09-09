@@ -16,7 +16,7 @@ const ProtectedRoute = ({children}: ProtectedRouteProps) => {
                 {children}
             </Authenticated>
             <Unauthenticated>
-                <Navigate to="/login" replace/>,
+                <Navigate to="/login" replace/>
             </Unauthenticated>
         </>
     )

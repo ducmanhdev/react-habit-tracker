@@ -37,8 +37,14 @@ const router = createBrowserRouter([
                 element: <PageAppSetting/>,
             },
             {
-                path: "manage-habits",
+                path: "manage-habits/:category?",
                 element: <PageManageHabits/>,
+                children: [
+                    {
+                        index: true,
+                        element: <Navigate to="/manage-habits/active" replace/>,
+                    },
+                ]
             },
         ]
     },
@@ -61,7 +67,7 @@ export default function App() {
         <ThemeProvider>
             <ModalConfirmProvider>
                 <RouterProvider router={router}/>
-            </ModalConfirmProvider>,
+            </ModalConfirmProvider>
             <Toaster richColors/>
         </ThemeProvider>
     )

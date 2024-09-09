@@ -1,5 +1,5 @@
-import {useMemo, useRef, memo} from "react";
-import {NavLink, Link, NavLinkProps, useLocation} from "react-router-dom";
+import {useMemo, useRef} from "react";
+import {Link, useLocation} from "react-router-dom";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -13,74 +13,18 @@ import {useQuery} from "convex/react";
 import {api} from "../../../convex/_generated/api";
 import {Avatar, AvatarImage, AvatarFallback} from "@/components/ui/avatar.tsx";
 import ModalAddHabitGroup, {ModalAddHabitGroupRef} from "@/components/ModalAddHabitGroup.tsx";
-import Icon from "@/components/Icon.tsx";
+import MenuItem, {MenuItemProps} from "@/components/MenuItem.tsx";
+import {List, SquareLibrary, Settings, Pencil, Plus} from "lucide-react";
 
-type AsideMenuItemProps = {
-    id?: number | string;
-    route?: NavLinkProps['to'];
-    onClick?: () => void;
-    icon: string;
-    label: string;
-    suffixIcon?: string;
-    suffixIconAction?: () => void;
-    isActive?: boolean;
-}
+type MenuItemWithId = MenuItemProps & { id: string };
 
-const AsideMenuItem = memo(({
-                                id,
-                                icon,
-                                label,
-                                route,
-                                onClick,
-                                suffixIcon,
-                                suffixIconAction,
-                                isActive = false
-                            }: AsideMenuItemProps) => {
-
-    const content = (
-        <>
-            <Icon name={icon} className="flex-shrink-0"/>
-            <span className="flex-grow overflow-hidden text-ellipsis">{label}</span>
-            {
-                suffixIcon && (
-                    <Icon
-                        name={suffixIcon}
-                        className="flex-shrink-0"
-                        onClick={e => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            suffixIconAction && suffixIconAction()
-                        }}
-                    />
-                )
-            }
-        </>
-    );
-
-    return (
-        <Button
-            key={id}
-            asChild
-            variant={isActive ? "default" : "ghost"}
-            className="w-full justify-start inline-flex cursor-pointer text-ellipsis"
-            onClick={onClick}
-        >
-            {route ? (
-                <NavLink to={route}>{content}</NavLink>
-            ) : (
-                <span>{content}</span>
-            )}
-        </Button>
-    );
-});
-
-const main: AsideMenuItemProps[] = [
-    {id: 1, label: "All habits", icon: "SquareLibrary", route: "/habits"},
+const main: MenuItemWithId[] = [
+    {id: "main-1", label: "All habits", icon: <SquareLibrary/>, route: "/habits"},
 ]
 
-const settings: AsideMenuItemProps[] = [
-    {id: 1, label: "Manage habits", icon: "List", route: "/manage-habits"},
-    {id: 2, label: "App settings", icon: "Settings", route: "/settings"},
+const settings: MenuItemWithId[] = [
+    {id: "settings-1", label: "Manage habits", icon: <List/>, route: "/manage-habits"},
+    {id: "settings-2", label: "App settings", icon: <Settings/>, route: "/settings"},
 ]
 
 const Aside = () => {
@@ -90,13 +34,13 @@ const Aside = () => {
     const habitGroups = useQuery(api.habitGroups.getGroups);
 
     const modalAddHabitGroupRef = useRef<ModalAddHabitGroupRef>(null);
-    const groups: AsideMenuItemProps[] = useMemo(() => [
+    const groups: MenuItemWithId[] = useMemo(() => [
         ...(habitGroups || []).map(group => ({
             id: group._id,
             label: group.name,
-            icon: group.icon as AsideMenuItemProps["icon"],
+            icon: group.icon as MenuItemWithId["icon"],
             route: `/habits/${group._id}`,
-            suffixIcon: "Pencil",
+            suffixIcon: <Pencil/>,
             suffixIconAction: () => modalAddHabitGroupRef?.current?.open({
                 id: group._id,
                 icon: group.icon,
@@ -106,7 +50,7 @@ const Aside = () => {
         {
             id: '',
             label: 'Add new group',
-            icon: 'Plus',
+            icon: <Plus/>,
             onClick: () => modalAddHabitGroupRef?.current?.open(),
         }
     ], [habitGroups]);
@@ -125,6 +69,14 @@ const Aside = () => {
         }
     ], [groups]);
 
+    const handleCheckIsMenuActive = (route: MenuItemProps["route"]) => {
+        if (route?.toString().startsWith("/habits")) {
+            return location.pathname === route;
+        } else {
+            return route ? location.pathname.startsWith(route.toString()) : false;
+        }
+    }
+
     return (
         <>
             <ModalAddHabitGroup ref={modalAddHabitGroupRef}/>
@@ -138,16 +90,15 @@ const Aside = () => {
                                 }
                                 {
                                     group.children.map(child => (
-                                        <AsideMenuItem
-                                            key={child.id}
-                                            id={child.id}
+                                        <MenuItem
+                                            key={child.label}
                                             route={child.route}
                                             icon={child.icon}
                                             label={child.label}
                                             suffixIcon={child.suffixIcon}
                                             suffixIconAction={child.suffixIconAction}
                                             onClick={child.onClick}
-                                            isActive={location.pathname === child.route}
+                                            isActive={handleCheckIsMenuActive(child.route)}
                                         />
                                     ))
                                 }

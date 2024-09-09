@@ -4,7 +4,7 @@ import {useParams} from "react-router-dom";
 import {useEffect, useMemo, useRef, useState} from "react";
 import RightBar from "@/pages/PageHabits/RightBar.tsx";
 import HabitBoard from "@/pages/PageHabits/HabitBoard.tsx";
-import CardHabitsEmpty from "./CardHabitsEmpty.tsx";
+import CardHabitsEmpty from "../../components/CardHabitsEmpty.tsx";
 import ModalAddHabitItem from "@/components/ModalAddHabitItem.tsx";
 import {useQuery} from "convex/react";
 import {api} from "../../../convex/_generated/api";
@@ -54,11 +54,7 @@ const Index = () => {
                                     <HabitItemSkeleton key={index}/>
                                 ))
                             ) : habitItems.length === 0 ? (
-                                <CardHabitsEmpty
-                                    onCreateHabit={() => modalAddHabitIemRef?.current?.open({
-                                        groupId: habitGroupId,
-                                    })}
-                                />
+                                <CardHabitsEmpty />
                             ) : (
                                 habitItems.map(habit => (
                                     <HabitItem

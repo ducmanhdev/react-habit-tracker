@@ -4,12 +4,11 @@ import {useParams} from "react-router-dom";
 import {useEffect, useMemo, useRef, useState} from "react";
 import RightBar from "@/pages/PageHabits/RightBar.tsx";
 import HabitBoard from "@/pages/PageHabits/HabitBoard.tsx";
-import CardHabitsEmpty from "../../components/CardHabitsEmpty.tsx";
-import ModalAddHabitItem from "@/components/ModalAddHabitItem.tsx";
+import CardHabitsEmpty from "@/components/CardHabitsEmpty.tsx";
+import ModalAddHabitItem, {ModalAddHabitItemRef} from "@/components/ModalAddHabitItem.tsx";
 import {useQuery} from "convex/react";
 import {api} from "../../../convex/_generated/api";
 import {Id} from "../../../convex/_generated/dataModel";
-import {ModalAddHabitItemRef} from "@/components/ModalAddHabitItem.tsx";
 import HabitItem from "@/components/HabitItem.tsx";
 import HabitItemSkeleton from "@/components/HabitItemSkeleton.tsx";
 

@@ -1,7 +1,7 @@
 import {lazy, Suspense, memo, useMemo} from 'react';
 import { LucideProps } from 'lucide-react';
 import dynamicIconImports from 'lucide-react/dynamicIconImports';
-import {convertToKebabCase} from "@/utils/text.ts";
+import {convertToKebabCase} from "@/utils/string.ts";
 
 const fallbackIcon = 'message-circle-warning';
 const fallback = <div style={{ background: '#ddd', width: 24, height: 24 }}/>

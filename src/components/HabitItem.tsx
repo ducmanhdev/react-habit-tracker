@@ -23,9 +23,8 @@ import {api} from "../../convex/_generated/api";
 import {toast} from "sonner";
 import {Doc} from "../../convex/_generated/dataModel";
 import Icon from "@/components/Icon.tsx";
-import dayjs from "dayjs";
+import dayjs from "@/lib/dayjs";
 import {Input} from "@/components/ui/input.tsx";
-import {isToday} from "@/utils/date.ts";
 import {useModalConfirm} from "@/contexts/modal-confirm-provider.tsx";
 
 type HabitItemProps = {
@@ -92,7 +91,7 @@ const HabitItem = ({
     const [completed, setCompleted] = useState(false);
     useEffect(() => {
         if (habit?.lastCompleted && dayjs(habit.lastCompleted).isValid()) {
-            setCompleted(isToday(habit.lastCompleted));
+            setCompleted(dayjs(habit.lastCompleted).isToday());
         } else {
             setCompleted(false);
         }

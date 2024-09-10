@@ -13,7 +13,7 @@ import {toast} from "sonner";
 import IconPicker, {IconName} from "@/components/IconPicker.tsx";
 import DatePicker from "@/components/DatePicker.tsx";
 import {HABIT_SCHEDULE_TYPES, HABIT_GOAL_UNITS, HABIT_GOAL_TIME_UNITS} from "@/constants/habits.ts";
-import dayjs from "dayjs";
+import dayjs from "@/lib/dayjs";
 import {convertToCapitalCase} from "@/utils/text.ts";
 import {DAYS_OF_WEEKS} from "@/constants/dates.ts";
 import Combobox from "@/components/Combobox.tsx";

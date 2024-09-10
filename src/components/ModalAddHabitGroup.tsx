@@ -11,7 +11,7 @@ import {useMutation} from "convex/react";
 import {api} from "../../convex/_generated/api";
 import {toast} from "sonner";
 import IconPicker, {IconName} from "@/components/IconPicker.tsx";
-import {useModalConfirm} from "@/providers/modal-confirm-provider.tsx";
+import {useModalConfirm} from "@/contexts/modal-confirm-provider.tsx";
 
 const formSchema = z.object({
     name: z.string().min(1, "Please enter name of habit group"),

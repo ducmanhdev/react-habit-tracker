@@ -5,7 +5,7 @@ import {Doc} from "../../../convex/_generated/dataModel";
 import {useMutation} from "convex/react";
 import {api} from "../../../convex/_generated/api";
 import {toast} from "sonner";
-import {useModalConfirm} from "@/providers/modal-confirm-provider.tsx";
+import {useModalConfirm} from "@/contexts/modal-confirm-provider.tsx";
 
 type RightBarProps = {
     currentHabit: Doc<"habitItems">;

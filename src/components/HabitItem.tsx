@@ -26,7 +26,7 @@ import Icon from "@/components/Icon.tsx";
 import dayjs from "dayjs";
 import {Input} from "@/components/ui/input.tsx";
 import {isToday} from "@/utils/date.ts";
-import {useModalConfirm} from "@/providers/modal-confirm-provider.tsx";
+import {useModalConfirm} from "@/contexts/modal-confirm-provider.tsx";
 
 type HabitItemProps = {
     habit: Doc<"habitItems">;

@@ -17,7 +17,7 @@ import dayjs from "dayjs";
 import {convertToCapitalCase} from "@/utils/text.ts";
 import {DAYS_OF_WEEKS} from "@/constants/dates.ts";
 import Combobox from "@/components/Combobox.tsx";
-import {useModalConfirm} from "@/providers/modal-confirm-provider.tsx";
+import {useModalConfirm} from "@/contexts/modal-confirm-provider.tsx";
 
 const SCHEDULE_TYPE_OPTIONS = HABIT_SCHEDULE_TYPES.map(item => ({
     label: convertToCapitalCase(item),

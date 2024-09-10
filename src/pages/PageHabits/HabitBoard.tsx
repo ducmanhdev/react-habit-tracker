@@ -1,5 +1,5 @@
 import {Card, CardDescription, CardHeader, CardTitle} from "@/components/ui/card.tsx";
-import {Doc} from "../../../convex/_generated/dataModel";
+import {Doc} from "@convex/_generated/dataModel";
 import {Flame} from "lucide-react";
 
 type HabitBoardProps = {

@@ -7,8 +7,8 @@ import HabitBoard from "@/pages/PageHabits/HabitBoard.tsx";
 import CardHabitsEmpty from "@/components/CardHabitsEmpty.tsx";
 import ModalAddHabitItem, {ModalAddHabitItemRef} from "@/components/ModalAddHabitItem.tsx";
 import {useQuery} from "convex/react";
-import {api} from "../../../convex/_generated/api";
-import {Id} from "../../../convex/_generated/dataModel";
+import {api} from "@convex/_generated/api";
+import {Id} from "@convex/_generated/dataModel";
 import HabitItem from "@/components/HabitItem.tsx";
 import HabitItemSkeleton from "@/components/HabitItemSkeleton.tsx";
 
@@ -53,7 +53,7 @@ const Index = () => {
                                     <HabitItemSkeleton key={index}/>
                                 ))
                             ) : habitItems.length === 0 ? (
-                                <CardHabitsEmpty />
+                                <CardHabitsEmpty/>
                             ) : (
                                 habitItems.map(habit => (
                                     <HabitItem

@@ -10,7 +10,7 @@ import {Button} from "@/components/ui/button.tsx";
 import {Separator} from "@/components/ui/separator.tsx"
 import {useAuthActions} from "@convex-dev/auth/react";
 import {useQuery} from "convex/react";
-import {api} from "../../../convex/_generated/api";
+import {api} from "@convex/_generated/api";
 import {Avatar, AvatarImage, AvatarFallback} from "@/components/ui/avatar.tsx";
 import ModalAddHabitGroup, {ModalAddHabitGroupRef} from "@/components/ModalAddHabitGroup.tsx";
 import MenuItem, {MenuItemProps} from "@/components/MenuItem.tsx";

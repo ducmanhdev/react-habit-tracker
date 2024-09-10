@@ -3,7 +3,7 @@ import {Separator} from "@/components/ui/separator.tsx";
 import {Archive, Trash2, FolderOpenDot} from "lucide-react";
 import {useMatch, useNavigate} from "react-router-dom";
 import {useQuery} from "convex/react";
-import {api} from "../../convex/_generated/api";
+import {api} from "@convex/_generated/api";
 import HabitItemSkeleton from "@/components/HabitItemSkeleton.tsx";
 import CardHabitsEmpty from "@/components/CardHabitsEmpty.tsx";
 import HabitItem from "@/components/HabitItem.tsx";

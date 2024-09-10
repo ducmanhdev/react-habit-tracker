@@ -1,9 +1,9 @@
 import {useState} from "react";
 import {Button} from "@/components/ui/button.tsx";
 import {Pencil, Trash} from "lucide-react";
-import {Doc} from "../../../convex/_generated/dataModel";
+import {Doc} from "@convex/_generated/dataModel";
 import {useMutation} from "convex/react";
-import {api} from "../../../convex/_generated/api";
+import {api} from "@convex/_generated/api";
 import {toast} from "sonner";
 import {useModalConfirm} from "@/contexts/modal-confirm-provider.tsx";
 

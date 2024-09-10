@@ -19,9 +19,9 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu.tsx";
 import {useMutation} from "convex/react";
-import {api} from "../../convex/_generated/api";
+import {api} from "@convex/_generated/api";
 import {toast} from "sonner";
-import {Doc} from "../../convex/_generated/dataModel";
+import {Doc} from "@convex/_generated/dataModel";
 import Icon from "@/components/Icon.tsx";
 import dayjs from "@/lib/dayjs";
 import {Input} from "@/components/ui/input.tsx";

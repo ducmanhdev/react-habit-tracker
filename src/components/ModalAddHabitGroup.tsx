@@ -7,11 +7,8 @@ import {useForm} from "react-hook-form";
 import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Id} from "@convex/_generated/dataModel";
-import {useMutation} from "convex/react";
-import {api} from "@convex/_generated/api";
-import {toast} from "sonner";
 import IconPicker, {IconName} from "@/components/IconPicker.tsx";
-import {useModalConfirm} from "@/contexts/modal-confirm-provider.tsx";
+import {useAddGroup, useDeleteGroup, useUpdateGroup} from "@/hooks/useHabitGroups.ts";
 
 const formSchema = z.object({
     name: z.string().min(1, "Please enter name of habit group"),
@@ -47,59 +44,31 @@ const ModalAddHabitGroup = forwardRef<ModalAddHabitGroupRef>((_props, ref) => {
         }
     }));
 
-    const modalConfirm = useModalConfirm();
-    const add = useMutation(api.habitGroups.addGroup);
-    const update = useMutation(api.habitGroups.updateGroup);
-    const del = useMutation(api.habitGroups.deleteGroup);
-
-    const [open, setOpen] = useState(false);
     const [groupId, setGroupId] = useState<FormData["id"]>();
+    const {handleAdd} = useAddGroup();
+    const {handleUpdate} = useUpdateGroup();
+    const {handleDelete, deleteLoading} = useDeleteGroup();
+    const [open, setOpen] = useState(false);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
     })
     const [submitLoading, setSubmitLoading] = useState(false);
-    const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        try {
-            setSubmitLoading(true)
-            if (groupId) {
-                await update({
-                    id: groupId,
-                    name: values.name,
-                    icon: values.icon
-                })
-                toast.success("Update successfully");
-            } else {
-                await add({
-                    name: values.name,
-                    icon: values.icon
-                })
-                toast.success("Create successfully");
-            }
-            setOpen(false)
-        } catch (error) {
-            toast.error("Somethings went wrong!")
-        } finally {
-            setSubmitLoading(false)
+    const onSubmit = async (values: FormData) => {
+        setSubmitLoading(true);
+        if (groupId) {
+            await handleUpdate({
+                ...values,
+                id: groupId,
+            });
+        } else {
+            await handleAdd({
+                ...values,
+            });
         }
-    };
 
-    const [deleteLoading, setDeleteLoading] = useState(false);
-    const handleDelete = () => {
-        modalConfirm.confirm(async () => {
-            try {
-                setDeleteLoading(true)
-                await del({
-                    id: groupId!,
-                })
-                toast.success('Delete successfully');
-                setOpen(false);
-            } catch (error) {
-                toast.success('Delete failed');
-            } finally {
-                setDeleteLoading(false)
-            }
-        })
-    }
+        setSubmitLoading(false);
+        setOpen(false);
+    };
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -151,7 +120,10 @@ const ModalAddHabitGroup = forwardRef<ModalAddHabitGroupRef>((_props, ref) => {
                                 variant="destructive"
                                 className="w-full"
                                 disabled={deleteLoading}
-                                onClick={handleDelete}
+                                onClick={() => handleDelete(
+                                    groupId,
+                                    () => setOpen(false)
+                                )}
                             >Delete</Button>
                         }
                     </form>

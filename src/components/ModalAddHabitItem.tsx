@@ -1,4 +1,4 @@
-import {forwardRef, useImperativeHandle, useMemo, useState} from "react";
+import {forwardRef, useImperativeHandle, useState} from "react";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog.tsx";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form.tsx";
 import {Input} from "@/components/ui/input.tsx";
@@ -7,9 +7,8 @@ import {useForm, useWatch} from "react-hook-form";
 import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Id} from "@convex/_generated/dataModel";
-import {useMutation, useQuery} from "convex/react";
+import {useQuery} from "convex/react";
 import {api} from "@convex/_generated/api";
-import {toast} from "sonner";
 import IconPicker, {IconName} from "@/components/IconPicker.tsx";
 import DatePicker from "@/components/DatePicker.tsx";
 import {HABIT_SCHEDULE_TYPES, HABIT_GOAL_UNITS, HABIT_GOAL_TIME_UNITS} from "@/constants/habits.ts";
@@ -17,7 +16,7 @@ import dayjs from "@/lib/dayjs";
 import {convertToCapitalCase} from "@/utils/string.ts";
 import {DAYS_OF_WEEKS} from "@/constants/dates.ts";
 import Combobox from "@/components/Combobox.tsx";
-import {useModalConfirm} from "@/contexts/modal-confirm-provider.tsx";
+import {useAddHabit, useDeleteHabit, useUpdateHabit} from "@/hooks/useHabitItems.ts";
 
 const SCHEDULE_TYPE_OPTIONS = HABIT_SCHEDULE_TYPES.map(item => ({
     label: convertToCapitalCase(item),
@@ -147,77 +146,47 @@ const ModalAddHabitItem = forwardRef<ModalAddHabitItemRef>((_props, ref) => {
         }
     }));
 
-    const modalConfirm = useModalConfirm();
-    const habitGroups = useQuery(api.habitGroups.getGroups);
-
-    const add = useMutation(api.habitItems.addItem);
-    const update = useMutation(api.habitItems.updateItem);
-    const del = useMutation(api.habitItems.deleteItem);
-
     const [open, setOpen] = useState(false);
+    const {handleDelete, deleteLoading} = useDeleteHabit();
+    const {handleAdd} = useAddHabit();
+    const {handleUpdate} = useUpdateHabit();
+
+    const habitGroups = useQuery(api.habitGroups.getGroups);
+    const habitGroupOptions = (habitGroups || []).map(group => ({
+        label: group.name,
+        value: group._id,
+    }))
+
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
     });
+
     const [submitLoading, setSubmitLoading] = useState(false);
-
-
-    form.getValues()
     const onSubmit = async (values: FormData) => {
-        try {
-            setSubmitLoading(true);
-            const {id, groupId, ...rest} = values;
-            if (id) {
-                await update({
-                    ...rest,
-                    id: id as Id<"habitItems">,
-                    groupId: groupId as Id<"habitGroups">,
-                });
-                toast.success("Updated successfully");
-            } else {
-                await add({
-                    ...rest,
-                    groupId: groupId as Id<"habitGroups">,
-                });
-                toast.success("Created successfully");
-            }
-            setOpen(false);
-        } catch (error) {
-            toast.error("Something went wrong!");
-        } finally {
-            setSubmitLoading(false);
-        }
-    };
+        setSubmitLoading(true);
+        const {id, groupId, ...rest} = values;
 
-    const [deleteLoading, setDeleteLoading] = useState(false);
-    const handleDelete = () => {
-        modalConfirm.confirm(async () => {
-            try {
-                setDeleteLoading(true);
-                await del({
-                    id: form.getValues("id") as Id<"habitItems">,
-                });
-                toast.success('Deleted successfully');
-                setOpen(false);
-            } catch (error) {
-                toast.error('Delete failed');
-            } finally {
-                setDeleteLoading(false);
-            }
-        })
-    }
+        if (id) {
+            await handleUpdate({
+                ...rest,
+                id: id as Id<"habitItems">,
+                groupId: groupId as Id<"habitGroups">,
+            });
+        } else {
+            await handleAdd({
+                ...rest,
+                groupId: groupId as Id<"habitGroups">,
+            });
+        }
+
+        setSubmitLoading(false);
+        setOpen(false);
+    };
 
     const scheduleType = useWatch({
         control: form.control,
         name: "schedule.type",
     });
-
-    const habitGroupOptions = useMemo(() =>
-            (habitGroups || []).map(group => ({
-                label: group.name,
-                value: group._id,
-            })),
-        [habitGroups]
-    );
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -453,7 +422,10 @@ const ModalAddHabitItem = forwardRef<ModalAddHabitItemRef>((_props, ref) => {
                                 variant="destructive"
                                 className="w-full"
                                 disabled={deleteLoading}
-                                onClick={handleDelete}
+                                onClick={() => handleDelete(
+                                    form.getValues("id") as Id<"habitItems">,
+                                    () => setOpen(false))
+                            }
                             >
                                 Delete
                             </Button>

@@ -7,10 +7,10 @@ type ModalConfirmContextType = {
 
 const ModalConfirmContext = createContext<ModalConfirmContextType | null>(null);
 
-export const useModalConfirm = () => {
+export const useModalConfirmContext = () => {
     const context = useContext(ModalConfirmContext);
     if (!context) {
-        throw new Error("useModalConfirm must be used within a ModalConfirmProvider");
+        throw new Error("useModalConfirmContext must be used within a ModalConfirmProvider");
     }
     return context;
 };

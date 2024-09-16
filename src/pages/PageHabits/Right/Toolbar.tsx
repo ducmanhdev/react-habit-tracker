@@ -1,42 +1,26 @@
-import {useState} from "react";
 import {Button} from "@/components/ui/button.tsx";
 import {Pencil, Trash} from "lucide-react";
+import {useDeleteHabit} from "@/hooks/useHabitItems.ts";
 import {Doc} from "@convex/_generated/dataModel";
-import {useMutation} from "convex/react";
-import {api} from "@convex/_generated/api";
-import {toast} from "sonner";
-import {useModalConfirm} from "@/contexts/modal-confirm-provider.tsx";
 
 type ToolbarProps = {
-    currentHabit: Doc<"habitItems">;
+    currentHabit: Doc<"habitItems">,
     onEdit: () => void;
 }
-
 const Toolbar = ({currentHabit, onEdit}: ToolbarProps) => {
-    const modalConfirm = useModalConfirm();
-    const del = useMutation(api.habitItems.deleteItem);
-    const [deleteLoading, setDeleteLoading] = useState(false);
-    const handleDelete = () => {
-        modalConfirm.confirm(async () => {
-            try {
-                setDeleteLoading(true);
-                await del({id: currentHabit._id});
-                toast.success('Deleted successfully');
-            } catch (error) {
-                toast.error('Delete failed');
-            } finally {
-                setDeleteLoading(false);
-            }
-        })
-    }
+    const {handleDelete, deleteLoading} = useDeleteHabit();
     return (
         <nav className="p-4 flex gap-2 justify-between items-center">
-            <h2>{currentHabit.name}</h2>
+            <h2>{currentHabit?.name}</h2>
             <div className="flex gap-2">
-                <Button variant="outline" onClick={() => onEdit()}>
+                <Button variant="outline" onClick={onEdit}>
                     <Pencil/>
                 </Button>
-                <Button variant="outline" onClick={() => handleDelete()} disabled={deleteLoading}>
+                <Button
+                    variant="outline"
+                    onClick={() => handleDelete(currentHabit?._id)}
+                    disabled={deleteLoading}
+                >
                     <Trash/>
                 </Button>
             </div>

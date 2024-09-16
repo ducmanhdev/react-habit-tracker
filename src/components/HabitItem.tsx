@@ -18,14 +18,18 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu.tsx";
-import {useMutation} from "convex/react";
-import {api} from "@convex/_generated/api";
 import {toast} from "sonner";
 import {Doc} from "@convex/_generated/dataModel";
 import Icon from "@/components/Icon.tsx";
 import dayjs from "@/lib/dayjs";
 import {Input} from "@/components/ui/input.tsx";
-import {useModalConfirm} from "@/contexts/modal-confirm-provider.tsx";
+import {
+    useArchiveHabit,
+    useDeleteHabit, useResetCompletedCount,
+    useRestoreArchiveHabit,
+    useRestoreDeleteHabit,
+    useUpdateCountHabit
+} from "@/hooks/useHabitItems.ts";
 
 type HabitItemProps = {
     habit: Doc<"habitItems">;
@@ -79,105 +83,30 @@ const HabitItem = ({
                        onClick,
                        onEdit
                    }: HabitItemProps) => {
-    const modalConfirm = useModalConfirm();
+    const {handleDelete, deleteLoading} = useDeleteHabit();
+    const {handleRestoreDelete} = useRestoreDeleteHabit();
+    const {handleArchive} = useArchiveHabit();
+    const {handleRestoreArchive} = useRestoreArchiveHabit();
+    const {handleUpdateCount, updateCountLoading} = useUpdateCountHabit();
+    const {handleResetCompletedCount} = useResetCompletedCount();
 
-    const archiveItem = useMutation(api.habitItems.archiveItem);
-    const restoreArchiveItem = useMutation(api.habitItems.restoreArchiveItem);
-    const deleteItem = useMutation(api.habitItems.deleteItem);
-    const restoreDeleteItem = useMutation(api.habitItems.restoreDeleteItem);
-    const updateCompletedCount = useMutation(api.habitItems.updateCompletedCount);
-    const resetCompletedCount = useMutation(api.habitItems.resetCompletedCount);
+    const isCompleted = habit?.lastCompleted && dayjs(habit.lastCompleted).isValid() && dayjs(habit.lastCompleted).isToday()
+    const isCanLogProgress = !isCompleted && !isMinimalist;
 
-    const [completed, setCompleted] = useState(false);
-    useEffect(() => {
-        if (habit?.lastCompleted && dayjs(habit.lastCompleted).isValid()) {
-            setCompleted(dayjs(habit.lastCompleted).isToday());
-        } else {
-            setCompleted(false);
-        }
-    }, [habit.lastCompleted]);
-
-    const [deleteLoading, setDeleteLoading] = useState(false);
-    const handleDelete = () => {
-        modalConfirm.confirm(async () => {
-            try {
-                setDeleteLoading(true);
-                await deleteItem({id: habit._id});
-                toast.success('Delete successfully');
-            } catch (error) {
-                toast.error('Delete failed');
-            } finally {
-                setDeleteLoading(false);
-            }
-        })
-    }
-
-    const handleRestoreDelete = async () => {
-        try {
-            await restoreDeleteItem({id: habit._id});
-            toast.success('Restore successfully');
-        } catch (error) {
-            toast.error('Restore failed');
-        }
-    }
-
-    const handleArchive = async () => {
-        try {
-            await archiveItem({id: habit._id});
-            toast.success('Archive successfully');
-        } catch (error) {
-            toast.error('Archive failed');
-        }
-    }
-
-    const handleRestoreArchive = async () => {
-        try {
-            await restoreArchiveItem({id: habit._id});
-            toast.success('Restore archive successfully');
-        } catch (error) {
-            toast.error('Restore archive failed');
-        }
-    }
-
-    const [updateCountLoading, setUpdateCountLoading] = useState(false);
-    const handleUpdateCount = async (increment: number) => {
-        try {
-            setUpdateCountLoading(true);
-            await updateCompletedCount({
-                id: habit._id,
-                increment: increment
-            });
-        } catch (error) {
-            toast.error('Update failed');
-        } finally {
-            setUpdateCountLoading(false);
-        }
-    }
-
-    const handleUndoComplete = async () => {
-        try {
-            await resetCompletedCount({id: habit._id});
-        } catch (error) {
-            toast.error('Delete failed');
-        }
-    }
-
-    const isCanLogProgress = !completed && !isMinimalist;
-
-    const logProgressActionItems = completed
-        ? [{icon: <Undo/>, label: 'Undo complete', action: handleUndoComplete}]
+    const logProgressActionItems = isCompleted
+        ? [{icon: <Undo/>, label: 'Undo complete', action: () => handleResetCompletedCount(habit._id)}]
         : [
-            {icon: <Check/>, label: 'Check-in', action: () => handleUpdateCount(1)},
+            {icon: <Check/>, label: 'Check-in', action: () => handleUpdateCount({id: habit._id, increment: 1})},
             {icon: <Keyboard/>, label: 'Log Progress', action: () => setLogging(true)},
         ];
 
     const archiveActionItem = habit.isArchived
-        ? {icon: <ArchiveRestore/>, label: 'Restore archive', action: handleRestoreArchive}
-        : {icon: <Archive/>, label: 'Archive', action: handleArchive};
+        ? {icon: <ArchiveRestore/>, label: 'Restore archive', action: () => handleRestoreArchive(habit._id)}
+        : {icon: <Archive/>, label: 'Archive', action: () => handleArchive(habit._id)};
 
     const deleteActionItem = habit.isDeleted
-        ? {icon: <Trash2/>, label: 'Restore delete', action: handleRestoreDelete}
-        : {icon: <Trash2/>, label: 'Delete', action: handleDelete}
+        ? {icon: <Trash2/>, label: 'Restore delete', action: () => handleRestoreDelete(habit._id)}
+        : {icon: <Trash2/>, label: 'Delete', action: () => handleDelete(habit._id)}
 
     const menuItemsMinimalist = habit.isDeleted
         ? [
@@ -208,7 +137,7 @@ const HabitItem = ({
     const handleLogging = async (value: number) => {
         try {
             if (value !== 0) {
-                await updateCompletedCount({id: habit._id, increment: value});
+                await handleUpdateCount({id: habit._id, increment: value});
             }
             setLogging(false);
         } catch (error) {
@@ -225,7 +154,10 @@ const HabitItem = ({
                     disabled={updateCountLoading}
                     onClick={(e) => {
                         e.stopPropagation();
-                        handleUpdateCount(1);
+                        handleUpdateCount({
+                            id: habit._id,
+                            increment: 1
+                        });
                     }}
                 >
                     <Plus/> 1
@@ -259,7 +191,7 @@ const HabitItem = ({
             className={
                 `p-2 border rounded flex gap-4 items-center cursor-pointer 
                 ${isActive && "border-primary"} 
-                ${completed && "opacity-80"}
+                ${isCompleted && "opacity-80"}
                 `
             }
             onClick={() => onClick?.()}
@@ -272,8 +204,8 @@ const HabitItem = ({
                 />
             </div>
             <div className="flex-grow">
-                <p className={`${completed ? 'line-through' : ''}`}>{habit.name}</p>
-                <p className={`text-sm text-muted-foreground ${completed ? 'line-through' : ''}`}>
+                <p className={`${isCompleted ? 'line-through' : ''}`}>{habit.name}</p>
+                <p className={`text-sm text-muted-foreground ${isCompleted ? 'line-through' : ''}`}>
                     {
                         `${habit.goal.completedCount}/${habit.goal.target} ${habit.goal.unit}`
                     }

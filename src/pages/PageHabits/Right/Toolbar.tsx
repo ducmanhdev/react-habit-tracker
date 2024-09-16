@@ -7,12 +7,12 @@ import {api} from "@convex/_generated/api";
 import {toast} from "sonner";
 import {useModalConfirm} from "@/contexts/modal-confirm-provider.tsx";
 
-type RightBarProps = {
+type ToolbarProps = {
     currentHabit: Doc<"habitItems">;
     onEdit: () => void;
 }
 
-const RightBar = ({currentHabit, onEdit}: RightBarProps) => {
+const Toolbar = ({currentHabit, onEdit}: ToolbarProps) => {
     const modalConfirm = useModalConfirm();
     const del = useMutation(api.habitItems.deleteItem);
     const [deleteLoading, setDeleteLoading] = useState(false);
@@ -44,4 +44,4 @@ const RightBar = ({currentHabit, onEdit}: RightBarProps) => {
     )
 }
 
-export default RightBar
+export default Toolbar

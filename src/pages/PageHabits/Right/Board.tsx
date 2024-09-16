@@ -6,7 +6,7 @@ type HabitBoardProps = {
     currentHabit: Doc<"habitItems">
 }
 
-const HabitBoard = ({currentHabit}: HabitBoardProps) => {
+const Board = ({currentHabit}: HabitBoardProps) => {
     return (
         <div className="p-4 grid grid-cols-2 content-start gap-4">
             <Card className="col-span-full">
@@ -42,4 +42,4 @@ const HabitBoard = ({currentHabit}: HabitBoardProps) => {
     )
 }
 
-export default HabitBoard
+export default Board

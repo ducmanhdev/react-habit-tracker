@@ -3,7 +3,7 @@ import {Button} from "@/components/ui/button.tsx";
 import {ArrowUpDown, Calendar, Plus, Search} from "lucide-react";
 import DatePicker from "@/components/DatePicker.tsx";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select.tsx";
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip"
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip.tsx"
 import {Input} from "@/components/ui/input.tsx";
 
 export type FilteredData = {
@@ -12,12 +12,12 @@ export type FilteredData = {
     date: Date | undefined;
 }
 
-type PageHabitsLeftBarProps = {
+type ToolbarProps = {
     onFilter: (filteredData: FilteredData) => void;
     onCreateHabit: () => void;
 }
 
-const LeftBar = ({onFilter, onCreateHabit}: PageHabitsLeftBarProps) => {
+const Toolbar = ({onFilter, onCreateHabit}: ToolbarProps) => {
     const orderOptions = [
         {value: "a-z", label: "A-Z"},
         {value: "z-a", label: "Z-A"},
@@ -113,4 +113,4 @@ const LeftBar = ({onFilter, onCreateHabit}: PageHabitsLeftBarProps) => {
     )
 }
 
-export default LeftBar
+export default Toolbar

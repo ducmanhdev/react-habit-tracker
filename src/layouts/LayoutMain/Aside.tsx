@@ -54,7 +54,7 @@ const Aside = () => {
             onClick: () => modalAddHabitGroupRef?.current?.open(),
         }
     ], [habitGroups]);
-    const navGroups = useMemo(() => [
+    const navGroups = [
         {
             name: "",
             children: main
@@ -67,7 +67,7 @@ const Aside = () => {
             name: "PREFERENCES",
             children: settings
         }
-    ], [groups]);
+    ];
 
     const handleCheckIsMenuActive = (route: MenuItemProps["route"]) => {
         if (route?.toString().startsWith("/habits")) {

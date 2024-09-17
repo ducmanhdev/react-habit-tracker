@@ -31,7 +31,7 @@ const IconPicker = ({currentIcon, onIconSelect}: IconPickerProps) => {
         return iconNames
             .filter((name) => name.toLowerCase().includes(search.toLowerCase()))
             .map(name => icons[name]);
-    }, [search, iconNames]);
+    }, [search]);
 
     const loadMoreIcons = () => {
         const nextLimit = limit + 50;

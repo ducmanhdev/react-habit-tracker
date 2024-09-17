@@ -1,4 +1,4 @@
-import {memo, isValidElement, ReactElement, cloneElement} from "react";
+import {memo, isValidElement, ReactElement, cloneElement, MouseEvent} from "react";
 import {NavLink, NavLinkProps} from "react-router-dom";
 import Icon from "@/components/Icon.tsx";
 import {Button} from "@/components/ui/button.tsx";
@@ -23,36 +23,34 @@ const MenuItem = ({
                       suffixIconAction,
                       isActive = false
                   }: MenuItemProps) => {
+
+
+    const prefixIcon = isValidElement(icon)
+        ? icon
+        : <Icon name={icon}/>
+
+    const handleSuffixIconClick = (e: MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        suffixIconAction?.();
+    }
+
+    const suffixIconFinal = suffixIcon && (
+        isValidElement(suffixIcon)
+            ? cloneElement(suffixIcon as ReactElement, {
+                onClick: handleSuffixIconClick
+            })
+            : <Icon
+                name={suffixIcon as string}
+                onClick={handleSuffixIconClick}
+            />
+    )
+
     const content = (
         <>
-            {
-                isValidElement(icon)
-                    ? icon
-                    : <Icon name={icon as string}/>
-            }
+            {prefixIcon}
             <span className="flex-grow overflow-hidden text-ellipsis">{label}</span>
-            {
-                suffixIcon && (
-                    isValidElement(suffixIcon)
-                        ? cloneElement(suffixIcon, {
-                            onClick: e => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                suffixIconAction?.();
-                            }
-                        })
-                        : (
-                            <Icon
-                                name={suffixIcon as string}
-                                onClick={e => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    suffixIconAction?.();
-                                }}
-                            />
-                        )
-                )
-            }
+            {suffixIconFinal}
         </>
     );
 
@@ -63,11 +61,11 @@ const MenuItem = ({
             className="w-full justify-start inline-flex cursor-pointer text-ellipsis"
             onClick={onClick}
         >
-            {route ? (
-                <NavLink to={route}>{content}</NavLink>
-            ) : (
-                <span>{content}</span>
-            )}
+            {
+                route
+                    ? <NavLink to={route}>{content}</NavLink>
+                    : <span>{content}</span>
+            }
         </Button>
     );
 };
